@@ -1,0 +1,102 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../behaviors/view-behavior.html">
+<link rel="import" href="../themes/current-theme/shared-styles/views-shared-styles.html">
+<link rel="import" href="../ui/ui-card.html">
+
+<dom-module id="view-404">
+<template>
+
+<style include="views-shared-styles">
+
+.Container {
+  @apply(--layout-vertical);
+
+  width: 100%;
+}
+
+ui-card {
+  @apply(--layout-vertical);
+  @apply(--layout-center-center);
+
+  min-height: calc(100vh - var(--shell-header-height));
+}
+
+.Polymerosaurus {
+  max-width: 200px;
+  margin: 24px 0;
+}
+
+/* Laptop wide */
+@media screen and (min-width: 960px) {
+  .Container {
+    width: auto;
+  }
+
+  ui-card {
+    @apply(--layout-horizontal);
+
+    min-height: calc(100vh - var(--shell-header-height) - 16px);
+  }
+
+  .Polymerosaurus {
+    max-width: 300px;
+    margin-right: 64px;
+  }
+}
+
+</style>
+
+<ui-card>
+
+  <img class="Polymerosaurus" alt="Polymerosaurus" src$="[[config.baseUrl]]images/logos/polymerosaurus.png">
+
+  <div class="Container">
+
+    <h1 hidden$="{{!app.isTabletWide}}">{{localize('page-not-found')}}</h1>
+    <h2>{{localize('we-are-sorry', 'url', _url)}}</h2>
+    <h3>
+      <span>{{localize('maybe-head-back')}}</span>
+      <a touch href$="[[app.defaultUrl]]">{{localize('homepage')}}</a>
+      <span>{{localize('or-use-links')}}</span>
+    </h3>
+
+  </div>
+
+</ui-card>
+
+</template>
+<script>
+
+Polymer({
+
+  is: 'view-404',
+
+  hasLocales: true,
+  hasMenuDisabled: true,
+  hasPersistentMenu: false,
+
+  behaviors: [
+    AppBehaviors.ViewBehavior
+  ],
+
+  properties: {
+    _url: {
+      type: String,
+      value: window.location.pathname
+    }
+  }
+
+});
+
+</script>
+</dom-module>

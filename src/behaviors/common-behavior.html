@@ -1,0 +1,93 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="logger-behavior.html">
+
+<script>
+
+window.AppBehaviors = window.AppBehaviors || {};
+
+AppBehaviors.CommonBehaviorImpl = {
+
+  properties: {
+    /**
+     * App state - shared state across app using data binding.
+     */
+    app: {
+      type: Object,
+      notify: true
+    },
+
+    /**
+     * Object contain browser type and features.
+     */
+    browser: {
+      type: Object,
+      readOnly: true,
+      // Value is shared object, otherwise it would be value: function() { return { ... }; }
+      value: {
+        // http://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browser
+        // http://stackoverflow.com/questions/4565112/javascript-how-to-find-out-if-the-user-browser-is-chrome
+        // https://github.com/viljamis/feature.js
+        // For Safari 7+, IE 11+, and the evergreen Chrome, Firefox, and Edge.
+        // Browser has Web Notifications
+        hasNotification: 'Notification' in window,
+        // Browser has Service Worker
+        hasServiceWorker: 'serviceWorker' in navigator,
+        // Browser has touch screen
+        hasTouchScreen: ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch || !!(window.navigator.msPointerEnabled && window.MSGesture),
+        // Browser has Web Components
+        hasWebComponents: 'registerElement' in document && 'import' in document.createElement('link') && 'content' in document.createElement('template'),
+        // Apache Cordova
+        isCordova: !!window.cordova,
+        // Edge 20+
+        isEdge: !(/*@cc_on!@*/false || !!document.documentMode) && !!window.StyleMedia, /* !isIE && !!window.StyleMedia */
+        // Firefox 1.0+
+        isFirefox: typeof InstallTrigger !== 'undefined',
+        // Chrome 1+
+        isChrome: !!window.chrome && !!window.chrome.webstore,
+        // Chrome on iOS
+        isChromeOnIOS: /CriOS/.test(navigator.userAgent),
+        // Chromium / Blink engine detection
+        isChromiumBased: !!window.chrome && !(!(/*@cc_on!@*/false || !!document.documentMode) && !!window.StyleMedia), /* !!window.chrome && !isEdge */
+        // Internet Explorer 6-11
+        isIE: /*@cc_on!@*/false || !!document.documentMode,
+        // Opera 8.0+
+        isOpera: (!!window.opr && !!opr.addons) || !!window.opera || /OPR/.test(navigator.userAgent),
+        // Safari 3.0+ "[object HTMLElementConstructor]"
+        isSafari: Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0 || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || safari.pushNotification),
+        // Browser on Android
+        onAndroid: /Android/.test(navigator.userAgent),
+        // Browser on iOS
+        onIOS: /(iPhone|iPad|iPod)/.test(navigator.platform)
+      }
+    },
+
+    /**
+     * App configuration.
+     */
+    config: {
+      type: Object,
+      readOnly: true,
+      // Value is shared object, otherwise it would be value: function() { return { ... }; }
+      value: window.Config
+    }
+  }
+
+}
+
+/** @polymerBehavior */
+AppBehaviors.CommonBehavior = [
+  AppBehaviors.LoggerBehavior,
+  AppBehaviors.CommonBehaviorImpl
+]
+
+</script>

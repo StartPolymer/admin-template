@@ -1,0 +1,522 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/svg-css/svg-css.html">
+<link rel="import" href="../behaviors/common-behavior.html">
+<link rel="import" href="../behaviors/localize-behavior.html">
+<link rel="import" href="../lazy/lazy-views.html">
+<link rel="import" href="../themes/current-theme/icons/shell-layout-icons.html">
+<link rel="import" href="../themes/current-theme/shared-styles/shell-shared-styles.html">
+
+<dom-module id="shell-layout">
+<template>
+
+<style include="shell-shared-styles">
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: var(--secondary-background-color);
+
+  /* Fix calc styles, rules need to be placed in custom element. */
+  --touch-target-button-padding: calc((var(--touch-target-size) - var(--button-height)) / 2);
+  --touch-target-line-padding: calc((var(--touch-target-size) - var(--line-height)) / 2);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+[hidden] {
+  display: none !important;
+}
+
+app-header {
+  /* elevation="2" */
+  @apply(--shadow-elevation-4dp);
+
+  color: var(--text-primary-color);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  font-size: var(--shell-header-font-size);
+  line-height: var(--shell-header-line-height);
+  z-index: 100;
+
+  --app-header-background-rear-layer: {
+    background-color: var(--primary-color);
+  };
+}
+
+app-header-layout {
+  min-height: 100vh;
+}
+
+shell-top-header-item {
+  @apply(--layout-horizontal);
+  @apply(--layout-center);
+
+  background-color: var(--primary-color);
+  position: relative;
+  height: var(--shell-header-height);
+  padding: 0 var(--screen-edge-margin) 0 0;
+  z-index: 300;
+}
+
+shell-top-header-item > [main-title] {
+  @apply(--layout-flex);
+}
+
+shell-middle-header-item {
+  height: calc(100vh - var(--shell-header-height));
+  /* min-height: 320px; /* iPhone 4 Landscape */
+}
+
+shell-bottom-header-item {
+  @apply(--layout-vertical);
+  @apply(--layout-center);
+
+  position: relative;
+  padding-top: 16px;
+}
+
+.Header-actionButton {
+  --paper-icon-button-ink-color: var(--text-primary-color);
+  padding: calc((var(--touch-target-size) - var(--icon-size)) / 2);
+  width: var(--touch-target-size);
+  height: var(--touch-target-size);
+  /* margin-left = screen-edge-margin - padding */
+  margin-left: calc(var(--screen-edge-margin) - (var(--touch-target-size) - var(--icon-size)) / 2);
+  /* margin-right = gutter - padding */
+  margin-right: calc(var(--gutter) - (var(--touch-target-size) - var(--icon-size)) / 2);
+}
+
+.Header-actionButtonIcon {
+  box-sizing: border-box !important;
+  padding: calc((var(--touch-target-size) - var(--icon-size)) / 2);
+  width: var(--touch-target-size);
+  height: var(--touch-target-size);
+  /* margin-left = screen-edge-margin - padding */
+  margin-left: calc(var(--screen-edge-margin) - (var(--touch-target-size) - var(--icon-size)) / 2);
+  /* margin-right = gutter - padding */
+  margin-right: calc(var(--gutter) - (var(--touch-target-size) - var(--icon-size)) / 2);
+}
+
+.Header-logo {
+  width: var(--header-logo-width);
+  height: var(--header-logo-height);
+  line-height: var(--header-logo-height);
+  padding-bottom: 2px;
+
+  fill: var(--text-primary-color);
+}
+
+.Header-logoLink {
+  @apply(--layout-horizontal);
+  @apply(--layout-center);
+}
+
+.Header-title {
+  @apply(--layout-horizontal);
+  @apply(--layout-center);
+
+  height: var(--shell-header-height);
+  min-width: 1px;
+  overflow: hidden;
+  pointer-events: auto !important;
+}
+
+.Header-titleBullet {
+  padding: 0 var(--gutter);
+}
+
+.Header-userName {
+  display: none;
+  margin-left: 8px;
+}
+
+.Icon-offline {
+  animation: fadeIn 0.5s;
+  height: 32px;
+  width: 32px;
+}
+
+.Logo {
+  height: 200px;
+  width: 200px;
+}
+
+/* Tablet wide */
+@media screen and (min-width: 600px) {
+  shell-middle-header-item {
+    height: calc(100vh - var(--shell-header-height) - 100px);
+  }
+
+  .Logo {
+    height: 400px;
+    width: 400px;
+  }
+}
+
+/* Laptop wide */
+@media screen and (min-width: 960px) {
+
+}
+
+/* Large wide */
+@media screen and (min-width: 1600px) {
+
+}
+
+/* Landscape phone height */
+@media screen and (orientation: landscape) and (max-height: 450px) {
+  .Logo {
+    height: 200px;
+    width: 200px;
+  }
+}
+
+/* Print */
+@media print {
+
+}
+
+</style>
+
+<app-header-layout id="headerLayout">
+
+  <app-header class$="Header Header--{{page}}" id="header"
+              condenses reveals fixed="[[_computeHeaderFixed(app.isTabletWide, page)]]">
+
+    <shell-top-header-item id="topHeaderItem" role="navigation" sticky>
+
+      <iron-icon class="Header-actionButtonIcon"
+                 icon="shell-layout:{{_headerActionButtonIcon}}" hidden$="[[_isLazyLoadComplete]]"></iron-icon>
+
+      <paper-icon-button class="Header-actionButton" id="actionButton"
+        on-tap="_onHeaderActionButtonTap"
+        icon="shell-layout:{{_headerActionButtonIcon}}"
+        aria-label$="{{localize(_headerActionButtonIcon)}}"
+        hidden$="[[!_isLazyLoadComplete]]"></paper-icon-button>
+
+      <paper-tooltip id="actionButtonTooltip" for="actionButton" offset="0"
+                     hidden$="{{!_isLazyLoadComplete}}">{{localize(_headerActionButtonIcon)}}</paper-tooltip>
+
+      <div class="Header-title" main-title>
+        <a class="Header-logoLink" href$="[[app.defaultUrl]]"
+           data-track-link="nav-home" data-ajax-link
+           aria-label$="[[localize('dashboard')]]"
+           hidden$="[[_computeHeaderLogoLeftHidden(app.isSignedIn, app.isMediumHandsetWide, page)]]">
+          <svg-css class="Header-logo" src="[[config.baseUrl]]images/logos/logo.svg"></svg-css>
+        </a>
+        <span class="Header-titleBullet" hidden$="{{_computeTitleBulletHidden(app.isMediumHandsetWide, page)}}">&bullet;</span>
+        <span hidden$="{{!_pageTitleComputed}}">{{_pageTitleComputed}}</span>
+      </div>
+
+      <iron-icon class="Icon-offline" id="iconOffline"
+                 icon="shell-layout:cloud-off" hidden$="{{!app.isOffline}}"></iron-icon>
+
+      <paper-tooltip for="iconOffline" offset="0"
+                     hidden$="{{!_isLazyLoadComplete}}">{{localize('offline')}}</paper-tooltip>
+
+      <a class="Header-logoLink" href$="[[app.defaultUrl]]"
+         data-track-link="nav-home" data-ajax-link
+         aria-label$="[[localize('dashboard')]]"
+         hidden$="[[_computeHeaderLogoRightHidden(app.isSignedIn, app.isMediumHandsetWide, page)]]">
+        <svg-css class="Header-logo" src="[[config.baseUrl]]images/logos/logo.svg"></svg-css>
+      </a>
+
+    </shell-top-header-item>
+
+  </app-header>
+
+  <lazy-views class="Views" id="views"
+      app="{{app}}"
+      page="[[page]]"
+      route="{{route}}"
+      subroute="{{subroute}}"
+      role="main"></lazy-views>
+
+  <!-- Drawer is lazy-created. -->
+  <!-- Two-way bind `app.isMenuOpened` since app-drawer can update `opened` itself. -->
+  <template is="dom-if" if="[[_computeDrawerPositionInHeaderLayout(app.isTabletWide, page, _isDrawerLoaded)]]">
+    <shell-drawer
+        class$="Drawer Drawer--[[page]]Page"
+        app="[[app]]"
+        hidden$="[[!_isDrawerLoaded]]"
+        opened="{{app.isMenuOpened}}"
+        page="[[page]]"
+        persistent="[[app.isPersistentMenu]]"></shell-drawer>
+  </template>
+
+</app-header-layout>
+
+<template is="dom-if" if="[[!_computeDrawerPositionInHeaderLayout(app.isTabletWide, page, _isDrawerLoaded)]]">
+  <shell-drawer
+      class$="Drawer Drawer--[[page]]Page"
+      app="[[app]]"
+      hidden$="[[!_isDrawerLoaded]]"
+      opened="{{app.isMenuOpened}}"
+      page="[[page]]"
+      persistent="[[app.isPersistentMenu]]"></shell-drawer>
+</template>
+
+</template>
+<script>
+
+Polymer({
+
+  is: 'shell-layout',
+
+  behaviors: [
+    AppBehaviors.CommonBehavior,
+    AppBehaviors.LocalizeBehavior
+  ],
+
+  properties: {
+    page: {
+      type: String,
+      reflectToAttribute: true,
+      observer: '_pageChanged'
+    },
+
+    route: {
+      type: Object,
+      notify: true
+    },
+
+    subroute: {
+      type: Object,
+      notify: true
+    },
+
+    _headerActionButtonIcon: {
+      type: String,
+      value: 'menu'
+    },
+
+    _isDrawerLoaded: {
+      type: Boolean,
+      value: false
+    },
+
+    _isHeaderCollapsed: {
+      type: Boolean,
+      value: false
+    },
+
+    _isHomePageResourcesLazyLoadComplete: {
+      type: Boolean,
+      value: false
+    },
+
+    _isLazyLoadComplete: {
+      type: Boolean,
+      value: false
+    },
+
+    _isLocalesLoaded: {
+      type: Boolean,
+      value: false
+    },
+
+    _isPageSwitched: {
+      type: Boolean,
+      value: false
+    },
+
+    _pageTitleComputed: {
+      type: String,
+      computed: '_computePageTitle(page, app.pageTitle, _isLocalesLoaded, app.isMediumHandsetWide)'
+    }
+  },
+
+  listeners: {
+    'app-resources-loaded': '_onLocalesLoaded',
+    'page-actived': '_onPageActived',
+    'page-loaded': '_onPageLoaded'
+  },
+
+  observers: [
+    '_isMenuDisabledChanged(app.isMenuDisabled)',
+    '_isPersistentMenuChanged(app.isPersistentMenu)'
+  ],
+
+  attached: function() {
+    this.loadLocales('shell');
+  },
+
+  _isMenuDisabledChanged: function(isMenuDisabled) {
+    this._headerActionButtonIcon = isMenuDisabled ? 'back' : 'menu';
+  },
+
+  _isPersistentMenuChanged: function(isPersistentMenu) {
+    if (!this._isDrawerLoaded && isPersistentMenu) {
+      this.importHref(this.resolveUrl('shell-drawer.html'), function() {
+        this._isDrawerLoaded = true;
+      });
+    }
+
+    if (this.app.isLaptopWide) {
+      this.set('app.isMenuOpened', isPersistentMenu);
+    } else {
+      this.set('app.isMenuOpened', false);
+    }
+
+    // Set icon of headerActionButton
+    this._headerActionButtonIcon = this.app.isMenuDisabled ? 'back' : 'menu';
+  },
+
+  /**
+   * Compute page title. isLocalesLoaded is used for waiting to load locales.
+   */
+  _computePageTitle: function(page, title, isLocalesLoaded, isMediumHandsetWide) {
+    if (title && isLocalesLoaded) {
+      try {
+        title = this.localize(title);
+      } catch(e) {}
+
+      window.document.title = title + ' • ' + this.config.appName;
+
+      if (isMediumHandsetWide) {
+        return title;
+      } else {
+        return page === 'home' ? '' : title;
+      }
+    }
+  },
+
+  _computeDrawerPositionInHeaderLayout: function(isTabletWide, page, _isDrawerLoaded) {
+    // Wait 1 tick for <app-header-layout> loading.
+    //this.async(function() {
+    return isTabletWide;
+    //});
+  },
+
+  _computeHeaderFixed: function(isTabletWide, page) {
+    return isTabletWide;
+  },
+
+  _computeHeaderLogoLeftHidden: function(isSignedIn, isMediumHandsetWide, page) {
+    return page !== 'home' && !isMediumHandsetWide || isSignedIn;
+  },
+
+  _computeHeaderLogoRightHidden: function(isSignedIn, isMediumHandsetWide, page) {
+    return page !== 'home' && !isMediumHandsetWide || !isSignedIn;
+  },
+
+  _computeTitleBulletHidden: function(isMediumHandsetWide, page) {
+    //return page === 'home' || page !== 'home' && !isMediumHandsetWide;
+    return true;
+  },
+
+  _ensureLazyLoaded: function() {
+    // Load lazy resources after render and set `_isLazyLoadComplete` when done.
+    if (!this._isLazyLoadComplete) {
+      Polymer.RenderStatus.afterNextRender(this, function() {
+        this.importHref(this.resolveUrl('shell-lazy-resources.html'), function() {
+          this._isLazyLoadComplete = true;
+
+          this.$.actionButtonTooltip.show();
+          this.async(function() {
+            this.$.actionButtonTooltip.hide();
+          }, 8000);
+
+          this.fire('shell-loaded');
+        });
+      });
+    }
+  },
+
+  _isPage: function(pageName, selectedPage) {
+    return pageName === selectedPage;
+  },
+
+  _onPageActived: function() {
+    // The size of the header depends on the page, so reset the header's layout only when switching pages.
+    this.$.header.resetLayout();
+    //this.$.headerLayout.resetLayout();
+    // Update header styles for dynamic loading background image
+    this.$.header.updateStyles();
+  },
+
+  _onPageLoaded: function() {
+    if (this.page !== 'home') {
+      this._ensureLazyLoaded();
+    }
+  },
+
+  _onHeaderActionButtonTap: function() {
+    if (this.app.isMenuDisabled) {
+      //window.history.back();
+
+      var url = this.route.path.split('/');
+      /*
+      if (url[url.length - 1] === '') {
+        url.pop();
+      }
+      url.pop();
+
+      var newUrl = url.join('/');
+      if (newUrl) {
+        this.set('route.path', newUrl);
+      } else {
+        this.set('route.path', this.app.defaultUrl);
+      }
+      */
+
+      if (url[url.length - 1] === 'forgot') {
+        this.set('route.path', 'signin');
+      } else {
+        this.set('route.path', this.app.defaultUrl);
+      }
+
+    } else {
+      if (!this._isDrawerLoaded) {
+        this.importHref(this.resolveUrl('shell-drawer.html'), function() {
+          this._isDrawerLoaded = true;
+          this._toggleDrawer();
+        });
+      } else {
+        this._toggleDrawer();
+      }
+    }
+  },
+
+  _onLocalesLoaded: function(event) {
+    event.stopPropagation();
+    this.set('_isLocalesLoaded', true);
+  },
+
+  _pageChanged: function(page, oldPage) {
+    if (page) {
+      // Scroll to the top of the page on every *route* change. Use `Polymer.AppLayout.scroll`
+      // with `behavior: 'silent'` to disable header scroll effects during the scroll.
+      //Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
+
+      this._isPageSwitched = Boolean(oldPage);
+
+      // Update styles for buttons in header. Buttons are using css mixins.
+      this.updateStyles();
+    }
+  },
+
+  // Toggle function for lazy loaded drawer
+  _toggleDrawer: function() {
+    this.set('app.isMenuOpened', !this.app.isMenuOpened);
+  }
+
+});
+
+</script>
+</dom-module>

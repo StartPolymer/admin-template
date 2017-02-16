@@ -1,0 +1,215 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+
+<dom-module id="components-shared-styles">
+<template>
+
+<style>
+
+[hidden] {
+  display: none !important;
+}
+
+/* Multi-Line Padded Text with background-color
+  http://stackoverflow.com/a/26828863/1614237
+  https://css-tricks.com/multi-line-padded-text/ */
+[highlight] {
+ display: inline;
+
+ padding: 0.5em 0em;
+
+ box-decoration-break: clone;
+ text-transform: uppercase;
+}
+
+[highlight][accent] {
+ color: var(--text-accent-color);
+ background-color: var(--accent-color);
+ box-shadow: 1em 0 0 var(--accent-color), -1em 0 0 var(--accent-color);
+ text-shadow: 0 0.5px 0 var(--text-accent-color-shadow-color);
+}
+
+[highlight][primary] {
+ color: var(--text-primary-color);
+ background-color: var(--primary-color);
+ box-shadow: 1em 0 0 var(--primary-color), -1em 0 0 var(--primary-color);
+ text-shadow: 0 0.5px 0 var(--text-primary-color-shadow-color);
+}
+
+a {
+  color: var(--primary-link-color);
+  cursor: pointer;
+  text-decoration: none;
+  text-shadow: 0 0.5px 0 var(--primary-link-color-shadow-color);
+  outline-width: 0;
+}
+
+a:focus {
+  background-color: var(--primary-color-50);
+  border-radius: var(--border-radius);
+}
+
+a[accent] {
+  color: var(--accent-link-color);
+  text-shadow: 0 0.5px 0 var(--accent-link-color-shadow-color);
+}
+
+a[touch] {
+  padding: calc((var(--touch-target-size) - var(--line-height)) / 2) 0;
+}
+
+center[horizontal] {
+  @apply(--layout-horizontal);
+  @apply(--layout-center);
+}
+
+center[vertical] {
+  @apply(--layout-vertical);
+  @apply(--layout-center);
+}
+
+h2 iron-icon {
+  width: 32px;
+  height: 32px;
+}
+
+hr {
+  border: 0;
+  height: 0;
+  border-top: 1px solid var(--divider-color);
+  margin: 48px;
+}
+
+hr[secondary] {
+  border: 0;
+  height: 1px;
+  background: var(--divider-color);
+  background-image: linear-gradient(to right, #eee, var(--divider-color), #eee);
+}
+
+/* https://github.com/PolymerElements/paper-icon-button/issues/97 */
+paper-icon-button[accent] {
+  color: var(--accent-color);
+  --paper-icon-button-ink-color: var(--accent-color);
+}
+
+paper-icon-button[primary] {
+  color: var(--primary-color);
+  --paper-icon-button-ink-color: var(--primary-color);
+}
+
+paper-checkbox {
+  /* Fix colors, PR https://github.com/PolymerElements/paper-checkbox/pull/161 */
+  --paper-checkbox-unchecked-color: var(--secondary-text-color);
+  --paper-checkbox-unchecked-ink-color: var(--secondary-text-color);
+
+  padding-top: calc((var(--touch-target-size) - 18px) / 2);
+  padding-bottom: calc((var(--touch-target-size) - 18px) / 2);
+}
+
+paper-radio-button {
+  padding-top: calc((var(--touch-target-size) - 16px) / 2) !important;
+  padding-bottom: calc((var(--touch-target-size) - 16px) / 2) !important;
+}
+
+paper-toggle-button {
+  --paper-toggle-button-unchecked-bar-color: var(--toggle-unchecked-bar-color);
+  --paper-toggle-button-unchecked-button-color: var(--toggle-unchecked-button-color);
+  --paper-toggle-button-unchecked-ink-color: var(--toggle-unchecked-ink-color);
+  --paper-toggle-button-checked-bar-color: var(--toggle-checked-bar-color);
+  --paper-toggle-button-checked-button-color: var(--toggle-checked-button-color);
+  --paper-toggle-button-checked-ink-color: var(--toggle-checked-ink-color);
+
+  padding-top: calc((var(--touch-target-size) - 22px) / 2);
+  padding-bottom: calc((var(--touch-target-size) - 22px) / 2);
+  padding-left: 1px;
+  padding-right: 1px;
+}
+
+paper-tooltip {
+  --paper-tooltip: {
+    font-size: 16px;
+  };
+}
+
+/* Material Design Text fields
+   https://material.google.com/components/text-fields.html */
+
+.Input,
+paper-input,
+paper-textarea {
+  /*min-height: 72px;*/
+  outline-width: 0;
+
+  --paper-input-container-focus-color: var(--accent-color);
+
+  --paper-input-container-input: {
+    font-size: var(--input-font-size);
+  };
+
+  --paper-input-container-label: {
+    font-size: var(--input-font-size);
+  };
+
+  --paper-input-error: {
+    font-size: var(--input-error-font-size);
+  };
+}
+
+.Input--removeHighlight {
+  --paper-input-container-input: {
+    font-size: var(--input-font-size);
+
+    /* Remove autocomplete highlight color in Chrome
+       http://stackoverflow.com/a/36140769 */
+    -webkit-transition: background-color 0s ease-in-out 50000s, color 0s ease-in-out 5000s;
+  };
+}
+
+.Input-icon {
+  margin-right: 16px;
+}
+
+/* Tablet wide */
+@media screen and (min-width: 600px) {
+
+}
+
+/* Laptop wide */
+@media screen and (min-width: 960px) {
+
+}
+
+/* Large wide */
+@media screen and (min-width: 1600px) {
+
+}
+
+/* Landscape phone height */
+@media screen and (orientation: landscape) and (max-height: 450px) {
+
+}
+
+/* Landscape phone minimal height - iPhone 4 */
+@media screen and (orientation: landscape) and (max-height: 320px) {
+
+}
+
+/* Print mode */
+@media print {
+
+}
+
+</style>
+
+</template>
+</dom-module>

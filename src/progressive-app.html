@@ -1,0 +1,386 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="behaviors/common-behavior.html">
+<link rel="import" href="themes/current-theme/global-styles/global-styles.html">
+<link rel="import" href="io/io-localstorage.html">
+
+<dom-module id="progressive-app">
+
+  <template>
+
+    <style>
+
+      :host {
+        display: block;
+        min-height: 100vh;
+      }
+
+    </style>
+
+    <app-location route="{{_route}}"></app-location>
+    <app-route
+        pattern="/:page"
+        route="{{_route}}"
+        data="{{_routeData}}"
+        tail="{{_subroute}}"
+        query-params="{{_routeQueryParams}}"></app-route>
+
+    <app-scrollpos-control selected="[[page]]"></app-scrollpos-control>
+
+    <ui-snackbar id="snackbar" app="[[app]]"></ui-snackbar>
+
+    <shell-layout id="shell" app="{{app}}" page="[[page]]" route="{{_route}}" subroute="{{_subroute}}"></shell-layout>
+
+    <io-localstorage app="{{app}}"></io-localstorage>
+
+    <ui-breakpoints app="{{app}}"></ui-breakpoints>
+
+    <io-service-worker></io-service-worker>
+
+  </template>
+
+  <script>
+
+    // Performance logging
+    window.performance && performance.mark && performance.mark('app - before register');
+
+    Polymer({
+
+      is: 'progressive-app',
+
+      behaviors: [AppBehaviors.CommonBehavior],
+
+      properties: {
+        /**
+         * App state - shared state across app using data binding.
+         */
+        app: {
+          type: Object,
+          value: function() { return {
+            // Responsive handlers using Material Design breakpoints
+            // http://www.google.com/design/spec/layout/adaptive-ui.html#adaptive-ui-breakpoints
+            isMediumHandsetWide: window.matchMedia('screen and (min-width:360px)').matches,
+            isTabletWide: window.matchMedia('screen and (min-width:600px)').matches,
+            isLaptopWide: window.matchMedia('screen and (min-width:960px)').matches,
+            isLargeWide: window.matchMedia('screen and (min-width:1600px)').matches,
+            isPrintMode: window.matchMedia('print').matches,
+
+            authToken: '',
+            baseUrl: window.Config.baseUrl, // For multilang URL - /cs
+            defaultUrl: window.Config.baseUrl,
+            isFacebookApiLibLoaded: false,
+            isGoogleApiLibLoaded: false,
+            isMenuDisabled: false,
+            isMenuOpened: false,
+            isOffline: !navigator.onLine,
+            isOnline: navigator.onLine,
+            isPersistentMenu: false,
+            isSignedIn: false,
+            isTouchFriendly: ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch,
+            pageTitle: '',
+            redirectTo: '',
+            referralId: '',
+            userAuthEmail: '',
+            userProfile: {}
+          };}
+        },
+
+        page: String,
+
+        _appVersion: {
+          type: String,
+          observer: '_appVersionChanged'
+        },
+
+        _isSetCssProperties: {
+          type: Boolean,
+          value: true
+        },
+
+        _route: Object,
+
+        _routeData: Object,
+
+        _routeQueryParams: Object,
+
+        _subroute: Object
+      },
+
+      listeners: {
+        'announce': '_onAnnounce',
+        'dom-change': '_onDomChange',
+        'change-route': '_onChangeRoute',
+        'check-browser-version': '_checkBrowserVersion',
+        'notify': '_onNotify',
+        'shell-loaded': '_onShellLoaded'
+      },
+
+      observers: [
+        '_appStateChanged(app.*)',
+        '_isTouchFriendlyChanged(app.isTouchFriendly)',
+        '_pageChanged(_routeData.page)',
+        '_pageChangedAfterAttached(_routeData.page, isAttached)',
+        '_wideChanged(app.isLaptopWide, app.isLargeWide)'
+      ],
+
+      created: function() {
+        window.performance && performance.mark && performance.mark(this.is + ' - created');
+        // Custom elements polyfill safe way to indicate an element has been upgraded.
+        this.removeAttribute('unresolved');
+      },
+
+      attached: function() {
+        // Listen for online/offline network status
+        Polymer.RenderStatus.afterNextRender(this, function() {
+          this.listen(window, 'online', '_notifyNetworkStatus');
+          this.listen(window, 'offline', '_notifyNetworkStatus');
+          //this._checkBrowserVersion();
+          this._checkAppVersion();
+        });
+        // For .u-scrollbar on Edge
+        if (this.browser.isEdge) {
+          this.classList.add('onEdgeBrowser');
+        }
+      },
+
+      _appStateChanged: function(changeRecord) {
+        this._log('App state changed: path:', changeRecord.path, 'value:', changeRecord.value);
+      },
+
+      _appVersionChanged: function(version, oldVersion) {
+        if (!oldVersion && version === this.config.appVersion) {
+          return;
+        }
+
+        this._log('New app version: ', version);
+
+        // Update Service Worker cache
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            registrations.forEach(function(registration) {
+              registration.update();
+            });
+          }).catch(function(error) {
+            // Getting Service Worker registrations failed
+            this._error('Getting Service Worker registrations failed with ' + error);
+            this._trackError('progressive-app', 'Getting Service Worker registrations failed with ' + error);
+            this.fire('notify', {
+              icon: 'update',
+              message: 'new-version-app',
+              buttonText: 'refresh',
+              buttonTapHandler: function() { // Handler for app-snackbar _onButtonTap
+                window.location.reload();
+              },
+              duration: 0 // Duration 0 indications shows the app-snackbar indefinitely.
+            });
+          }.bind(this));
+        } else {
+          this.fire('notify', {
+            icon: 'update',
+            message: 'new-version-app',
+            buttonText: 'refresh',
+            buttonTapHandler: function() { // Handler for app-snackbar _onButtonTap
+              window.location.reload();
+            },
+            duration: 0 // Duration 0 indications shows the app-snackbar indefinitely.
+          });
+        }
+      },
+
+      _checkAppVersion: function() {
+        this.async(function() {
+          var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function() {
+            if (xhttp.readyState == 4 && xhttp.status == 200) {
+              var json = JSON.parse(xhttp.responseText);
+              this._appVersion = json.appVersion;
+              this._checkAppVersion();
+            }
+          }.bind(this);
+
+          xhttp.open('GET', this.app.baseUrl + 'app-version.json', true);
+          xhttp.send();
+        }, 300000); // 5 minutes
+      },
+
+      _checkBrowserVersion: function(event) {
+        if (event.detail === 'videoSetOnAndroid') {
+          if (this.browser.onAndroid && !this.browser.isChromiumBased) {
+            this.fire('notify', {
+              icon: 'info',
+              message: 'download-chrome',
+              buttonText: 'download',
+              buttonTapHandler: function() { // Handler for app-snackbar _onButtonTap
+                this._reportEvent('info', 'click-download-chrome');
+                window.location = 'market://details?id=com.android.chrome';
+              }.bind(this)
+              //duration: 0 // Duration 0 indications shows the app-snackbar indefinitely.
+            });
+
+            this._reportEvent('info', 'notify-download-chrome');
+          }
+        }
+      },
+
+      _isTouchFriendlyChanged: function(isTouchFriendly) {
+        if (isTouchFriendly) {
+          this.customStyle['--touch-target-size'] = '48px';
+        } else {
+          this.customStyle['--touch-target-size'] = '40px';
+        }
+
+        this.updateStyles();
+      },
+
+      _notifyNetworkStatus: function() {
+        // Ignore unstable network status for 1000ms
+        this.debounce('_notifyNetworkStatus', function() {
+          var oldOffline = this.app.isOffline;
+          this.set('app.isOffline', !navigator.onLine);
+
+          // Show the ui-snackbar if the user is offline when starting a new session
+          // or if the network status changed.
+          if (this.app.isOffline || (!this.app.isOffline && oldOffline === true)) {
+            if (this.app.isOffline) {
+              this.fire('notify', {
+                message: 'you-are-offline',
+                duration: 0
+              });
+            } else {
+              this.fire('notify', 'you-are-online');
+            }
+          }
+        }, 1000);
+      },
+
+      // Elements in the app can notify a change to be a11y announced.
+      _onAnnounce: function(e) {
+        this._announce(e.detail);
+      },
+
+      // A11y announce the given message.
+      _announce: function(message) {
+        this._a11yLabel = '';
+        this.debounce('_a11yAnnouncer', function() {
+          this._a11yLabel = message;
+        }, 100);
+      },
+
+      // This is for performance logging only.
+      _onDomChange: function(e) {
+        if (window.Config.isDebugMode && window.performance && performance.mark && !this.__loggedDomChange) {
+          var target = Polymer.dom(e).rootTarget;
+          if (target.domHost.is.match(this.page)) {
+            this.__loggedDomChange = true;
+            performance.mark(target.domHost.is + '.domChange');
+          }
+        }
+      },
+
+      _onChangeRoute: function(event) {
+        this.set('_route.path', this.app.baseUrl + event.detail);
+      },
+
+      _onNotify: function(event) {
+        // TODO: remove async with 500ms for notify events from app-auth
+        this.async(function() {
+          this.importHref(this.resolveUrl('ui/ui-snackbar.html'), function() {
+            this.$.snackbar.show(event.detail);
+          });
+        }, 500);
+      },
+
+      _onShellLoaded: function() {
+        Polymer.RenderStatus.afterNextRender(this, function() {
+          this.importHref(this.resolveUrl('lazy/lazy-resources.html'), function() {
+            this.importHref(this.resolveUrl('io/io-service-worker.html'), function() {
+
+            });
+          });
+        });
+      },
+
+      _pageChanged: function(page) {
+        this.importHref(this.resolveUrl('shell/shell-layout.html'));
+
+        //this._trackPageView(page);
+        ga('set', 'page', '/' + page);
+        ga('send', 'pageview');
+      },
+
+      _pageChangedAfterAttached: function(page, isAttached) {
+        // Debounce page changes caused queryParams
+        this.debounce('_pageChangedAfterAttached', function() {
+          // Clear page title for lazy loaded pages.
+          this.set('app.pageTitle', '');
+
+          // Handle subroutes that doesn't exists.
+          var isRouteTail = this._route.path.split('/').length >= 3;
+
+          if (page !== 'activate' && page !== 'change-password' && page !== 'questions' && page !== 'signin' &&
+              page !== 'public' && isRouteTail || page === 'public' && page === 'questions' && !isRouteTail) {
+            this.page = '404';
+            return;
+          }
+
+          if (page) {
+            this.page = page;
+          } else {
+            if (this.app.isSignedIn && this.app.defaultUrl !== '/') {
+              this.set('_route.path', this.app.defaultUrl);
+            } else {
+              this.page = 'dashboard';
+            }
+          }
+        });
+      },
+
+      // Set CSS custom properties using shim that Polymer provides
+      // Fix issue: CSS variables in Polymer ignore media queries https://github.com/Polymer/polymer/issues/2149
+      _setCssProperties: function(isLaptopWide, isLargeWide) {
+        if (isLargeWide) {
+          this.customStyle['--gutter'] = '24px';
+          this.customStyle['--screen-edge-margin'] = '40px';
+          this.customStyle['--shell-drawer-width'] = '296px';
+
+        } else if (isLaptopWide) {
+          this.customStyle['--gutter'] = '24px';
+          this.customStyle['--screen-edge-margin'] = '24px';
+          this.customStyle['--shell-drawer-width'] = '256px';
+
+        } else {
+          this.customStyle['--gutter'] = '16px';
+          this.customStyle['--screen-edge-margin'] = '16px';
+        }
+
+        this.async(function() {
+          this.updateStyles();
+        });
+      },
+
+      _wideChanged: function(isLaptopWide, isLargeWide) {
+        this.debounce('_wideChanged', function() {
+          if (!this._isSetCssProperties) {
+            this._setCssProperties(isLaptopWide, isLargeWide);
+          } else {
+            this._isSetCssProperties = false;
+          }
+        });
+      }
+
+    });
+
+  </script>
+
+</dom-module>

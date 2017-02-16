@@ -1,0 +1,251 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../behaviors/common-behavior.html">
+
+<dom-module id="io-ajax">
+
+  <template>
+
+    <iron-ajax id="ajax"
+               auto="[[auto]]"
+               body="[[body]]"
+               debounce-duration="300"
+               handle-as="json"
+               headers="[[_headersComputed]]"
+               method="[[method]]"
+               last-error="{{error}}"
+               last-response="{{response}}"
+               loading="{{loading}}"
+               on-error="_onError"
+               on-request="_onRequest"
+               on-response="_onResponse"></iron-ajax>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'io-ajax',
+
+      behaviors: [
+        AppBehaviors.CommonBehavior
+      ],
+
+      properties: {
+
+        auto: {
+          type: Boolean,
+          value: false
+        },
+
+        body: Object,
+
+        endpoint: {
+          type: String,
+          observer: '_endpointChanged'
+        },
+
+        failure: {
+          type: Boolean,
+          notify: true,
+          readOnly: true
+        },
+
+        /**
+         * Selector specifying which fields to include in a partial response.
+         */
+        fields: {
+          type: String,
+          value: ''
+        },
+
+        method: {
+          type: String,
+          value: 'GET'
+        },
+
+        loading: {
+          type: Boolean,
+          notify: true
+        },
+
+        error: {
+          type: Object,
+          notify: true
+        },
+
+        response: {
+          type: Object,
+          notify: true
+        },
+
+        token: {
+          type: String,
+          value: ''
+        },
+
+        url: {
+          type: String,
+          observer: '_urlChanged'
+        },
+
+        _headersComputed: {
+          type: Object,
+          computed: '_computeHeaders(fields, token)'
+        }
+
+      },
+
+      generateRequest: function() {
+        this._setFailure(false);
+        this.$.ajax.generateRequest();
+      },
+
+      go: function() {
+        this.generateRequest();
+      },
+
+      _computeHeaders: function(fields, token) {
+        var headers = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        };
+
+        if (fields) {
+          headers['X-Fields'] = fields;
+        }
+
+        if (token) {
+          headers.Authorization = token;
+        }
+
+        return headers;
+      },
+
+      _endpointChanged: function() {
+        this.$.ajax.url = this.config.apiBaseUrl + this.endpoint;
+      },
+
+      _getErrorMessage: function (response) {
+        //console.log(response);
+        var errors = null;
+        var message = '';
+
+        if (response.messages) {
+          errors = response.messages.error || response.messages.errors;
+        } else {
+          return response.error;
+        }
+/*
+        if (error['email']) {
+          message = error['email'][0];
+
+        } else if (error['non-field-errors']) {
+          message = error['non-field-errors'][0];
+
+        // Field errors should be found
+        } else {
+*/
+        if (errors) {
+          for (var e in errors) {
+            if (errors.hasOwnProperty(e)) {
+              message += errors[e] + ' ';
+              //break;
+            }
+          }
+        }
+
+        if (!message) {
+          message = 'sorry-error-occurred';
+        }
+
+        return message;
+      },
+
+      /**
+       * Stop the original iron-ajax event from bubbling up
+       * and fire custom one with response data parsed (reponse & status)
+       */
+      _onError: function(event) {
+        event.stopPropagation();
+        this.fire('io-ajax-loading-ended');
+
+        // Unauthorized - the user does not have the necessary permissions for the resource.
+        if (this.error.status === 401) {
+          this.fire('io-ajax-unauthorized', {
+            response: this.error.response,
+            status: this.error.status
+          });
+          this.fire('notify', {
+            type: 'info',
+            icon: 'security',
+            message: 'your-session-expires'
+          });
+        // HTTP Error 403 Forbidden
+        } else if (this.error.status === 403) {
+          this.fire('notify', {
+            type: 'info',
+            icon: 'security',
+            message: 'forbidden-page'
+          });
+        } else {
+          this.fire('io-ajax-error', {
+            response: this.error.response,
+            status: this.error.status
+          });
+
+          if (this.error.response) {
+            this.fire('notify', {
+              type: 'error',
+              message: this._getErrorMessage(this.error.response)
+            });
+          }
+
+          this._trackError('io-ajax', 'status: ' + this.error.status + ' response: ' + String(this.error.response));
+        }
+
+        this._setFailure(true);
+        this._error('io-ajax-error: status:', this.error.status, this.error.statusText, 'response:', this.error.response);
+      },
+
+      _onRequest: function(event) {
+        event.stopPropagation();
+        this.fire('io-ajax-loading-started');
+        this._log('io-ajax-loading-started');
+      },
+
+      /**
+       * Stop the original iron-ajax event from bubbling up
+       * and fire custom one with response data parsed (reponse & status)
+       */
+      _onResponse: function(event) {
+        event.stopPropagation();
+        this.fire('io-ajax-loading-ended');
+
+        this.fire('io-ajax-success', {
+          response: this.response,
+          status: event.detail.status
+        });
+        this._log('io-ajax-success: status:', event.detail.status, event.detail.statusText, 'response:', this.response);
+      },
+
+      _urlChanged: function() {
+        this.$.ajax.url = this.url;
+      }
+
+    });
+
+  </script>
+
+</dom-module>

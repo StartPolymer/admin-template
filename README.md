@@ -1,1 +1,1 @@
-# admin-template
+# StartPolymer Admin Template

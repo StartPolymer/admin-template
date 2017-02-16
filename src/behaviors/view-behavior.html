@@ -1,0 +1,295 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/slide-from-left-animation.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/slide-right-animation.html">
+<link rel="import" href="../../bower_components/neon-animation/neon-shared-element-animatable-behavior.html">
+<link rel="import" href="common-behavior.html">
+<link rel="import" href="localize-behavior.html">
+
+<script>
+
+window.AppBehaviors = window.AppBehaviors || {};
+
+AppBehaviors.ViewBehaviorImpl = {
+
+  properties: {
+
+    active: {
+      type: Boolean,
+      value: false
+    },
+
+    animationConfig: {
+      type: Object,
+      value: function() {
+        return {
+          'entry': [{
+            name: 'slide-from-left-animation',
+            node: this
+          }],
+          'exit': [{
+            name: 'slide-right-animation',
+            node: this
+          }]
+        }
+      }
+    },
+
+    hasExternalData: {
+      type: Boolean,
+      value: false
+    },
+
+    hasExternalTemplates: {
+      type: Boolean,
+      value: false
+    },
+
+    hasLocales: {
+      type: Boolean,
+      value: false
+    },
+
+    hasMenuDisabled: {
+      type: Boolean,
+      value: false
+    },
+
+    hasPersistentMenu: {
+      type: Boolean,
+      value: false
+    },
+
+    loaded: {
+      type: Boolean,
+      notify: true,
+      readOnly: true,
+      reflectToAttribute: true,
+      value: false
+    },
+
+    localesName: {
+      type: String,
+      value: ''
+    },
+
+    pageName: {
+      type: String,
+      value: ''
+    },
+
+    withOpenedMenu: {
+      type: Boolean,
+      readOnly: true,
+      reflectToAttribute: true
+    },
+
+    withPersistentMenu: {
+      type: Boolean,
+      readOnly: true,
+      reflectToAttribute: true,
+      value: false
+    },
+
+    route: {
+      type: Object,
+      notify: true
+    },
+
+    slugName: {
+      type: String,
+      value: ''
+    },
+
+    subroute: {
+      type: Object,
+      notify: true
+    },
+
+    _cardElevation: {
+      type: Number,
+      value: 3
+    },
+
+    _isDataLoaded: {
+      type: Boolean,
+      value: false
+    },
+
+    _isTemplatesLoaded: {
+      type: Boolean,
+      value: false
+    },
+
+    _pageCardElevation: {
+      type: Number,
+      value: 3
+    },
+
+    _templatesLink: {
+      type: String
+    }
+
+  },
+
+  listeners: {
+    'page-loaded': '_onPageLoaded'
+  },
+
+  observers: [
+    '__activeChanged(active, isAttached)',
+    '__isLaptopWideChanged(app.isLaptopWide)',
+    '__isMenuOpenedChanged(app.isMenuOpened)'
+  ],
+
+  attached: function() {
+    if (!this.hasExternalData && !this.hasExternalTemplates) {
+      this.fire('page-loaded', this.id);
+    }
+    this._setWithPersistentMenu(this.hasPersistentMenu);
+  },
+
+  __activeChanged: function(active, isAttached) {
+    if (active) {
+      this.localesName = this.localesName || this.is;
+      this.slugName = this.slugName || this.is.replace('view-', '');
+      this.pageName = this.pageName || this.slugName;
+      this.set('app.isMenuDisabled', this.hasMenuDisabled);
+
+      if (this.app.isLaptopWide) {
+        this.set('app.isPersistentMenu', this.hasPersistentMenu);
+      } else {
+        this.set('app.isMenuOpened', false);
+      }
+
+      if (this.app.isLaptopWide && !this.hasPersistentMenu && this.app.isMenuOpened) {
+        this.set('app.isMenuOpened', false);
+      }
+
+      if (this.hasLocales) {
+        if (this._isLocalesLoaded) {
+          this.set('app.pageTitle', this.localize(this.pageName));
+        } else {
+          this._loadLocales(this.localesName);
+        }
+      } else {
+        this.set('app.pageTitle', this.pageName);
+      }
+
+      if (this.hasExternalTemplates) {
+        var templatesPath = this.config.baseUrl + 'data/pages/cs/' + this.slugName + '-cs.html';
+        this._templatesLink = this.importHref(templatesPath, function() {
+          // Wait 1 tick for _templatesLink.
+          this.async(function() {
+            this._templatesLoaded();
+          });
+        }, null);
+      }
+
+      // Call _pageActived after render local DOM
+      Polymer.RenderStatus.afterNextRender(this, function() {
+        this._pageActived();
+        this.fire('page-actived', this.id);
+      });
+    } else {
+      this._pageDeactived();
+    }
+  },
+
+  __isLaptopWideChanged: function(isLaptopWide) {
+    if (this.hasPersistentMenu) {
+      this.set('app.isPersistentMenu', isLaptopWide);
+    }
+  },
+
+  __isMenuOpenedChanged: function(isMenuOpened) {
+    this._setWithOpenedMenu(this.app.isMenuOpened);
+    // TODO
+    console.log('__isMenuOpenedChanged', isMenuOpened);
+  },
+
+  _onGetDataSuccess: function() {
+    this._isDataLoaded = true;
+    this._pageDataLoaded();
+    this.fire('page-data-loaded', this.id);
+
+    if (!this.hasExternalTemplates || this._isTemplatesLoaded) {
+      this.fire('page-loaded', this.id);
+    }
+  },
+
+  _onPageLoaded: function() {
+    this._setLoaded(true);
+    // Remove fadeIn animation after 500ms
+    this.async(function() {
+      this.style.animation = 'none';
+    }, 500);
+  },
+
+  _pageActived: function() {
+    return;
+  },
+
+  _pageDataLoaded: function() {
+    return;
+  },
+
+  _pageDeactived: function() {
+    return;
+  },
+
+  _templatesLoaded: function() {
+    // http://www.html5rocks.com/en/tutorials/webcomponents/imports/#deliver-webcomponents
+    // http://webcomponents.org/articles/introduction-to-html-imports/
+
+    if (!this._isTemplatesLoaded) {
+      // Clone the <template> in the import.
+      var templates = this._templatesLink.import.querySelectorAll('template[lang="cs"]');
+
+      for (var i = 0; i < templates.length; i++) {
+        var clone = document.importNode(templates[i], true);
+
+        // <template> goes live - run scripts and load images from template
+        Polymer.dom(this.$[templates[i].id]).appendChild(clone);
+      }
+
+      this._isTemplatesLoaded = true;
+      this.fire('page-templates-loaded', this.id);
+
+      if (!this.hasExternalData || this._isDataLoaded) {
+        this.fire('page-loaded', this.id);
+      }
+    }
+
+    //Polymer.dom.flush();
+
+    // document._currentScript is polyfill from webcomponents.js
+    //document._currentScript = document._currentScript || document.currentScript;
+    //var importDoc = document._currentScript.ownerDocument;
+    //console.log(importDoc);
+  },
+
+  _localesLoaded: function(event) {
+    this.set('app.pageTitle', this.localize(this.pageName));
+  }
+
+}
+
+/** @polymerBehavior */
+AppBehaviors.ViewBehavior = [
+  AppBehaviors.CommonBehavior,
+  AppBehaviors.LocalizeBehavior,
+  AppBehaviors.ViewBehaviorImpl,
+  Polymer.NeonSharedElementAnimatableBehavior
+]
+
+</script>

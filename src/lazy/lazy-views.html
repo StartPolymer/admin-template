@@ -1,0 +1,125 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/neon-animation/neon-animated-pages.html">
+
+<dom-module id="lazy-views">
+<template>
+
+<style>
+
+:host {
+  /* Fix Flexbox issue in IE11 */
+  @apply(--layout);
+}
+
+neon-animated-pages {
+  width: 100%;
+}
+
+</style>
+
+<neon-animated-pages
+    attr-for-selected="name"
+    selected="[[_selectedView]]"
+    fallback-selection="404">
+
+  <template id="dashboard" is="dom-if">
+    <view-dashboard name="dashboard" app="{{app}}"></view-dashboard>
+  </template>
+
+  <template id="forms" is="dom-if">
+    <view-forms name="forms" app="{{app}}"></view-forms>
+  </template>
+
+  <template id="charts" is="dom-if">
+    <view-charts name="charts" app="{{app}}"></view-charts>
+  </template>
+
+  <template id="tables" is="dom-if">
+    <view-tables name="tables" app="{{app}}"></view-tables>
+  </template>
+
+  <template id="404" is="dom-if">
+    <view-404 name="404" app="{{app}}"></view-404>
+  </template>
+
+</neon-animated-pages>
+
+</template>
+<script>
+
+Polymer({
+
+  is: 'lazy-views',
+
+  properties: {
+    app: {
+      type: Object,
+      notify: true
+    },
+
+    page: {
+      type: String,
+      reflectToAttribute: true,
+      observer: '_pageChanged'
+    },
+
+    _selectedView: String
+  },
+
+  _pageChanged: function(newPage, oldPage) {
+    if (!this.$[newPage]) {
+      newPage = '404';
+    }
+
+    if (oldPage) {
+      if (!this.$[oldPage]) {
+        oldPage = '404';
+      }
+
+      this.$$('view-' + oldPage).active = false;
+
+      if (oldPage === 'home') {
+        // Hide template with view
+        this.$[oldPage].if = false;
+      } else {
+        // Wait for exit-animation
+        this.async(function() {
+          // Hide template with view
+          this.$[oldPage].if = false;
+        }, 1000);
+      }
+    }
+
+    // Show template with view
+    this.$[newPage].if = true;
+
+    // Wait 1 tick for template to stamp.
+    this.async(function() {
+      this.$$('view-' + newPage).active = true;
+
+      // Load page import on demand. Show 404 page if fails. Disable async for after lazy loaded elements.
+      var resolvedPageUrl = this.resolveUrl('../views/view-' + newPage + '.html');
+      this.importHref(resolvedPageUrl, function() {
+        this._selectedView = newPage;
+      }, this._showPage404, false);
+    });
+  },
+
+  _showPage404: function() {
+    this.page = '404';
+  }
+
+});
+
+</script>
+</dom-module>

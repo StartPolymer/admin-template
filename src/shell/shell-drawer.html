@@ -1,0 +1,337 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../../bower_components/svg-css/svg-css.html">
+<link rel="import" href="../behaviors/common-behavior.html">
+<link rel="import" href="../behaviors/localize-behavior.html">
+<link rel="import" href="../themes/current-theme/icons/shell-drawer-icons.html">
+<link rel="import" href="../themes/current-theme/shared-styles/shell-shared-styles.html">
+
+<dom-module id="shell-drawer">
+
+  <template>
+
+    <style include="shell-shared-styles">
+
+      :host {
+        display: block;
+      }
+
+      .Drawer {
+        z-index: 200;
+        outline-width: 0;
+
+        --app-drawer-width: var(--shell-drawer-width);
+        --app-drawer-content-container: {
+          background-color: transparent;
+          /* https://www.smashingmagazine.com/2016/08/css-animations-motion-curves/
+          transition: 0.5s cubic-bezier(0.34, 0.99, 0.67, 0.9); */
+        };
+      }
+
+      .Drawer-content {
+        overflow-y: auto;
+        /* Momentum Scrolling on iOS Overflow Elements
+           https://css-tricks.com/snippets/css/momentum-scrolling-on-ios-overflow-elements/ */
+        -webkit-overflow-scrolling: touch;
+
+        box-sizing: border-box;
+        height: 100%;
+        padding: 0 var(--spacing-unit);
+
+        color: var(--primary-text-color);
+        background-color: var(--tertiary-background-color);
+        @apply(--layout-vertical);
+      }
+
+      .Drawer-content::-webkit-scrollbar {
+        width: 0 !important;
+      }
+
+      .Drawer-divider {
+        border-top: solid 1px var(--divider-color);
+        box-sizing: border-box;
+        margin-top: 8px;
+        padding-bottom: 8px;
+      }
+
+      .Drawer-footer {
+        @apply(--paper-font-caption);
+
+        border-top: 1px solid var(--divider-color);
+        margin-top: 8px;
+        padding: var(--spacing-unit) 0 var(--spacing-unit) calc(var(--screen-edge-margin) - var(--spacing-unit));
+      }
+
+      .Drawer-footerIcon {
+        height: 18px;
+        width: 18px;
+      }
+
+      .Drawer-header {
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+
+        border-bottom: solid 1px var(--divider-color);
+        box-sizing: border-box;
+        height: 64px;
+      }
+
+      .Drawer-header--home {
+        border: none;
+      }
+
+      .Drawer-headerLogo {
+        width: 112px;
+        height: 16px;
+
+        fill: var(--primary-text-color);
+      }
+
+      .Drawer-link {
+        color: currentColor;
+        text-decoration: none;
+      }
+
+      .Drawer-widget--first {
+        /* padding-top: calc(var(--spacing-unit) + 4px); /* 4px is height of header box-shadow */
+        padding-top: var(--spacing-unit);
+      }
+
+      .Icon-love {
+        /*color: var(--paper-red-a200);*/
+        color: var(--accent-color);
+      }
+
+      .Navigation-icon {
+        margin-right: var(--gutter);
+        pointer-events: none;
+      }
+
+      .Navigation-link {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--paper-font-navigation);
+
+        color: currentColor;
+        cursor: pointer;
+        height: calc(var(--touch-target-size));
+        padding-left: calc(var(--screen-edge-margin) - var(--spacing-unit));
+        padding-right: calc(var(--gutter) - var(--spacing-unit));
+        text-decoration: none;
+        outline: none;
+      }
+
+      .Navigation-link:hover {
+        background-color: var(--primary-background-color);
+      }
+
+      .Navigation-link.iron-selected {
+        background-color: var(--primary-background-color);
+        color: var(--accent-link-color);
+        font-weight: 500;
+      }
+
+      .Navigation-link.iron-selected .Navigation-icon {
+        color: var(--accent-color);
+      }
+
+      .Navigation-link--secondary {
+        color: rgba(0, 0, 0, 0.7);
+      }
+
+      .Navigation-text {
+        pointer-events: none;
+      }
+
+      /* Tablet wide */
+      @media screen and (min-width: 600px) {
+        .Drawer[persistent] .Drawer-content {
+          background-color: var(--primary-background-color);
+        }
+
+        .Drawer[persistent] .Navigation-link:hover,
+        .Drawer[persistent] .Navigation-link.iron-selected {
+          background-color: var(--secondary-background-color);
+        }
+
+        .Drawer-content {
+          border-radius: var(--border-radius);
+          height: calc(100% - var(--shell-header-height));
+          margin-top: calc(var(--shell-header-height));
+        }
+
+        .Drawer-content--home {
+          border-radius: 0;
+          height: 100%;
+          margin-top: 0;
+        }
+
+        .Drawer-header {
+          display: none;
+        }
+
+        .Drawer-header--home {
+          display: flex;
+          height: 128px;
+        }
+
+        .Drawer-content--home .Drawer-widget--first{
+          padding-top: 0;
+        }
+      }
+
+    </style>
+
+    <app-drawer class$="Drawer Drawer--[[page]]Page" opened="{{opened}}" persistent="[[persistent]]"
+                swipe-open disable-swipe="[[!app.isTouchFriendly]]" tabindex="0">
+
+      <div class$="Drawer-content Drawer-content--[[page]]">
+
+        <div>
+          <div class$="Drawer-header Drawer-header--[[page]]">
+            <svg-css class="Drawer-headerLogo" src="[[config.baseUrl]]images/logos/logo.svg"></svg-css>
+          </div>
+        </div>
+
+        <div class="Drawer-widget Drawer-widget--first">
+          <iron-selector class="Navigation" selected="[[page]]" attr-for-selected="name" role="navigation">
+
+            <a class="Navigation-link" name="dashboard" href="/">
+              <iron-icon class="Navigation-icon" icon="shell-drawer:dashboard"></iron-icon>
+              <span class="Navigation-text">{{localize('dashboard')}}</span>
+            </a>
+
+            <a class="Navigation-link" name="forms" href="/forms">
+              <iron-icon class="Navigation-icon" icon="shell-drawer:forms"></iron-icon>
+              <span class="Navigation-text">{{localize('forms')}}</span>
+            </a>
+
+            <a class="Navigation-link" name="charts" href="/charts">
+              <iron-icon class="Navigation-icon" icon="shell-drawer:charts"></iron-icon>
+              <span class="Navigation-text">{{localize('charts')}}</span>
+            </a>
+
+            <a class="Navigation-link" name="tables" href="/tables">
+              <iron-icon class="Navigation-icon" icon="shell-drawer:tables"></iron-icon>
+              <span class="Navigation-text">{{localize('tables')}}</span>
+            </a>
+
+            <div class="Drawer-divider"></div>
+
+            <a class="Navigation-link" name="settings" href="/settings">
+              <iron-icon class="Navigation-icon" icon="shell-drawer:settings"></iron-icon>
+              <span class="Navigation-text">{{localize('settings')}}</span>
+            </a>
+
+          </iron-selector>
+        </div>
+
+        <div class="u-spacer"></div>
+
+        <div class="Drawer-widget">
+
+          <div class="Navigation-link" on-tap="_onFeedbackTap">
+            <iron-icon class="Navigation-icon" icon="shell-drawer:feedback"></iron-icon>
+            <span class="Navigation-text">{{localize('feedback')}}</span>
+          </div>
+
+        </div>
+
+        <div class="Drawer-footer" title="[[config.appVersion]]">
+          <a class="Drawer-link" href="/about">
+            {{localize('made-with')}}
+            <iron-icon class="Drawer-footerIcon Icon-love" icon="shell-drawer:love"></iron-icon>
+            {{localize('by-team')}}
+          </a>
+        </div>
+
+      </div>
+    </app-drawer>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'shell-drawer',
+
+      behaviors: [
+        AppBehaviors.CommonBehavior,
+        AppBehaviors.LocalizeBehavior
+      ],
+
+      properties: {
+        app: Object,
+
+        opened: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
+        },
+
+        page: {
+          type: String,
+          reflectToAttribute: true
+        },
+
+        persistent: {
+          type: Boolean,
+          reflectToAttribute: true
+        }
+      },
+
+      listeners: {
+        'app-resources-loaded': '_onLocalesLoaded'
+      },
+
+      observers: [
+        '_isLaptopWideChanged(app.isLaptopWide)'
+      ],
+
+      attached: function() {
+        this.loadLocales('shell');
+      },
+
+      _isLaptopWideChanged: function(isLaptopWide) {
+        if (this.app.isPersistentMenu) {
+          this.opened = isLaptopWide;
+        }
+      },
+
+      _onFeedbackTap: function() {
+        if (!this.app.isPersistentMenu) {
+          this.opened = false;
+        }
+        this.fire('open-dialog', 'send-feedback');
+      },
+
+      _onLocalesLoaded: function(event) {
+        event.stopPropagation();
+      },
+
+      _onSignOutTap: function() {
+        this.opened = false;
+        this.page = 'home';
+        this.fire('auth-action', {
+          action: 'signOut'
+        });
+      }
+
+    });
+
+  </script>
+
+</dom-module>

@@ -1,0 +1,95 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-localize-behavior/app-localize-behavior.html">
+
+<script>
+
+window.AppBehaviors = window.AppBehaviors || {};
+
+AppBehaviors.LocalizeBehaviorImpl = {
+
+  properties: {
+    /* Overriden from Polymer.AppLocalizeBehavior */
+    formats: {
+      value: function() {
+        return {
+          number: { USD: { style: 'currency', currency: 'USD' } }
+        };
+      }
+    },
+
+    /* Overriden from Polymer.AppLocalizeBehavior */
+    language: {
+      value: function() {
+        // http://stackoverflow.com/a/38150585/1614237
+        var lang = navigator.languages && navigator.languages[0] || // Chrome / Firefox
+                   navigator.language ||   // All browsers
+                   navigator.userLanguage; // IE <= 10
+
+        if (lang.indexOf('-') !== -1) {
+          lang = lang.split('-')[0];
+        }
+
+        if (window.Config.availableLocales.indexOf(lang) === -1) {
+          lang = window.Config.defaultLocale;
+        }
+
+        return lang;
+      }
+    },
+
+    /* Overriden from Polymer.AppLocalizeBehavior */
+    useKeyIfMissing: {
+      value: true
+    },
+
+    _isLocalesLoaded: {
+      type: Boolean,
+      value: false
+    }
+  },
+
+  listeners: {
+    'app-resources-loaded': '_onLocalesLoaded'
+  },
+
+  // TODO: remove
+  loadLocales: function(element) {
+    this._loadLocales(element);
+  },
+
+  _loadLocales: function(element) {
+    var url = window.Config.baseUrl + 'data/locales/' + this.language + '/' +
+              element + '-' + this.language + '.json';
+
+    this.loadResources(url);
+  },
+
+  _localesLoaded: function() {
+    return;
+  },
+
+  _onLocalesLoaded: function(event) {
+    event.stopPropagation();
+    this._isLocalesLoaded = true;
+    this._localesLoaded();
+  }
+
+}
+
+/** @polymerBehavior */
+AppBehaviors.LocalizeBehavior = [
+  Polymer.AppLocalizeBehavior,
+  AppBehaviors.LocalizeBehaviorImpl
+]
+
+</script>

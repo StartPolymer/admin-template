@@ -1,0 +1,206 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!-- Responsive handlers using Material Design breakpoints
+     http://www.google.com/design/spec/layout/adaptive-ui.html#adaptive-ui-breakpoints -->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="ui-button">
+<template>
+
+<style>
+
+:host {
+  @apply(--layout-inline);
+
+  position: relative;
+  z-index: 0;
+
+  color: var(--primary-text-color);
+
+  box-sizing: border-box;
+  min-height: var(--touch-target-size);
+  padding: calc((var(--touch-target-size) - var(--button-height)) / 2) 0;
+
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  outline-width: 0;
+
+  font-size: var(--button-font-size);
+  font-weight: 500;
+
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-tap-highlight-color: transparent;
+}
+
+:host([disabled]) {
+  cursor: auto;
+  pointer-events: none;
+}
+
+:host([hidden]) {
+  display: none !important;
+}
+
+:host([start]) {
+  @apply(--layout-self-start);
+}
+
+:host([center]) {
+  @apply(--layout-self-center);
+}
+
+:host([end]) {
+  @apply(--layout-self-end);
+}
+
+:host([stretch]) {
+  @apply(--layout-self-stretch);
+}
+
+paper-button {
+  min-width: var(--ui-button-min-width, 88px);
+  min-height: var(--button-height);
+  margin: 0;
+  padding: calc((var(--button-height) - var(--line-height)) / 2) 16px;
+
+  letter-spacing: var(--small-font-letter-spacing);
+
+  border-radius: var(--ui-button-border-radius, --border-radius);
+
+  --paper-button-raised-keyboard-focus: {
+    font-weight: 500;
+  };
+  --paper-button-flat-keyboard-focus: {
+    font-weight: 500;
+  };
+
+  @apply(--ui-button-paper-button);
+  @apply(--ui-button-border);
+  @apply(--ui-button-padding);
+  @apply(--ui-button-shadow);
+}
+
+paper-button:hover {
+  @apply(--shadow-elevation-6dp);
+  @apply(--ui-button-hover);
+}
+
+:host-context(paper-dialog) paper-button {
+  min-width: 64px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+paper-button[accent] {
+  color: var(--accent-link-color);
+  text-shadow: 0 0.5px 0 var(--accent-link-color-shadow-color);
+}
+
+paper-button[accent][background][raised] {
+  color: var(--text-accent-color);
+  background-color: var(--accent-color);
+  text-shadow: 0 0.5px 0 var(--text-accent-color-shadow-color);
+}
+
+paper-button[accent][raised]:not([background]) {
+  box-shadow: 0 2px 2px 0 var(--light-accent-color), 0 1px 5px 0 var(--light-accent-color), 0 3px 1px -2px var(--light-accent-color);
+}
+
+paper-button[disabled] {
+  color: var(--disabled-text-color) !important;
+  background-color: transparent !important;
+  text-shadow: none !important;
+}
+
+paper-button[disabled][raised] {
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.1), 0 1px 5px 0 rgba(0, 0, 0, 0.1), 0 3px 1px -2px rgba(0, 0, 0, 0.1);
+}
+
+paper-button[primary] {
+  color: var(--primary-link-color);
+  text-shadow: 0 0.5px 0 var(--primary-link-color-shadow-color);
+}
+
+paper-button[primary][background][raised] {
+  color: var(--text-primary-color);
+  background-color: var(--primary-color);
+  text-shadow: 0 0.5px 0 var(--text-primary-color-shadow-color);
+}
+
+paper-button[primary][raised]:not([background]) {
+  box-shadow: 0 2px 2px 0 var(--light-primary-color), 0 1px 5px 0 var(--light-primary-color), 0 3px 1px -2px var(--light-primary-color);
+}
+
+paper-button.keyboard-focus {
+  font-size: calc(var(--button-font-size) + 1px);
+  font-weight: 500;
+}
+
+iron-icon {
+  margin-right: 16px;
+}
+
+</style>
+
+<paper-button
+    accent$="[[accent]]"
+    animated$="[[animated]]"
+    background$="[[background]]"
+    class$="[[class]]"
+    disabled="{{disabled}}"
+    elevation$="[[elevation]]"
+    focused="{{focused}}"
+    noink$="[[noink]]"
+    primary$="[[primary]]"
+    raised$="[[raised]]"
+    toggles$="[[toggles]]">
+  <content></content>
+</paper-button>
+
+</template>
+<script>
+
+Polymer({
+
+  is: 'ui-button',
+
+  properties: {
+    /**
+     * If true, the element currently has focus.
+     */
+    focused: {
+      type: Boolean,
+      value: false,
+      notify: true,
+      readOnly: true,
+      reflectToAttribute: true
+    },
+    /**
+     * If true, the user cannot interact with this element.
+     */
+    disabled: {
+      type: Boolean,
+      value: false,
+      notify: true,
+      reflectToAttribute: true
+    }
+  }
+
+});
+
+</script>
+</dom-module>

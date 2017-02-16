@@ -1,0 +1,27 @@
+{
+  "en": {
+    "caching-complete": "Stored in memory! Future visits will work offline.",
+    "close": "Close",
+    "download": "Download",
+    "download-chrome": "V tomto prohlížeči se vám set bohužel nezobrazí správně. Buď si prosím stáhněte Chrome, nebo set vyplňte v zařízení, které ho má. Děkujeme.",
+    "email-doesnt-match": "That email address doesn't match an existing account.",
+    "email-password-dont-match": "The email and password you entered don't match.",
+    "forbidden-page": "Forbidden page.",
+    "changes-saved": "Changes saved.",
+    "more-info": "More info",
+    "new-version-app": "A new version of this app is available.",
+    "ok": "Ok",
+    "password-reset-successfully": "Your password has been reset successfully.",
+    "refresh": "Refresh",
+    "sorry-error-occurred": "Sorry, an error occurred while processing your request.",
+    "successfully-activated-account": "You have successfully activated your account.",
+    "successfully-signed-out": "You have successfully signed out.",
+    "successfully-updated-password": "You have successfully updated the password, you can sign in.",
+    "you-are-offline": "You are offline.",
+    "you-are-online": "You are online.",
+    "you-are-signed-in": "You are already signed in.",
+    "your-browser-out-of-date": "Your browser is out of date.",
+    "your-message-sent": "Your message was sent.",
+    "your-session-expires": "Your session expires. You must sign in again."
+  }
+}

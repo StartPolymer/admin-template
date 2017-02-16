@@ -1,0 +1,273 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!--
+Material Design Snackbar
+https://material.google.com/components/snackbars-toasts.html
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../behaviors/localize-behavior.html">
+<link rel="import" href="../themes/current-theme/icons/ui-snackbar-icons.html">
+
+<dom-module id="ui-snackbar">
+<template>
+
+<style>
+
+:host {
+  display: block;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+paper-toast {
+  @apply(--layout-horizontal);
+  @apply(--layout-center);
+
+  color: #fff;
+  margin: calc(var(--gutter) / 2) 0 0 0;
+  padding: 14px calc(24px - (var(--touch-target-size) - var(--icon-size)) / 2) 14px 24px;
+  width: 100%;
+  min-width: 0;
+  border-radius: 0;
+  box-sizing: border-box;
+  z-index: 10000;
+}
+
+paper-toast.confirm {
+  border-bottom: 2px solid var(--paper-green-a400);
+}
+
+paper-toast.confirm iron-icon {
+  color: var(--paper-green-a400);
+}
+
+paper-toast.error {
+  border-bottom: 2px solid var(--paper-red-a200);
+}
+
+paper-toast.error iron-icon {
+  color: var(--paper-red-a200);
+}
+
+paper-toast.info {
+  border-bottom: 2px solid var(--paper-light-blue-a200);
+}
+
+paper-toast.info iron-icon {
+  color: var(--paper-light-blue-a200);
+}
+
+paper-toast.warning {
+  border-bottom: 2px solid var(--paper-amber-a200);
+}
+
+paper-toast.warning iron-icon {
+  color: var(--paper-amber-a200);
+}
+
+paper-button {
+  @apply(--paper-font-common-nowrap);
+
+  color: var(--light-accent-color);
+  font-size: var(--button-font-size);
+  font-weight: 500;
+  height: var(--touch-target-size);
+  letter-spacing: var(--small-font-letter-spacing);
+  margin: 0 0 0 24px;
+  min-width: var(--touch-target-size);
+  padding: calc((var(--touch-target-size) - var(--line-height)) / 2) 12px;
+}
+
+iron-icon {
+  margin-right: 16px;
+}
+
+paper-icon-button {
+  margin-left: 12px; /* 24px - 12px */
+
+  --paper-icon-button-ink-color: #fff;
+}
+
+.message {
+  @apply(--layout-flex);
+
+  display: inline-block;
+  margin-right: 12px;
+  min-height: 24px;
+}
+
+/* Tablet wide */
+@media screen and (min-width: 600px) {
+  paper-toast {
+    /* margin: calc(var(--gutter) / 2) var(--screen-edge-margin) var(--gutter) var(--screen-edge-margin); */
+    width: 568px;
+    height: 74px;
+    /*min-width: 288px;*/
+    border-radius: var(--border-radius);
+    /* https://github.com/PolymerElements/paper-toast/issues/83 */
+    margin-left: calc(50vw - 284px);
+  }
+
+  paper-button,
+  paper-icon-button {
+    margin-left: 36px; /* 48px - 12px */
+  }
+}
+
+/* Laptop wide */
+@media screen and (min-width: 960px) {
+  paper-toast {
+    padding: 0 calc(var(--gutter) - (var(--touch-target-size) - var(--icon-size)) / 2)
+             0 var(--gutter);
+  }
+}
+
+</style>
+
+<paper-toast class$="[[_type]]" id="snackbar">
+
+  <iron-icon class$="[[_icon]]" icon="ui-snackbar:[[_icon]]" hidden$="[[!app.isTabletWide]]"></iron-icon>
+
+  <div class="message">[[_message]]</div>
+
+  <paper-button id="button" hidden$="[[!_buttonText]]" on-tap="_onButtonTap">
+    [[_buttonText]]
+  </paper-button>
+
+  <paper-icon-button id="iconButton"
+      icon="ui-snackbar:close"
+      aria-label$="[[localize('close')]]"
+      hidden$="[[_buttonText]]"
+      title="[[localize('close')]]"
+      on-tap="_onButtonTap"></paper-icon-button>
+
+</paper-toast>
+
+</template>
+<script>
+
+Polymer({
+
+  is: 'ui-snackbar',
+
+  behaviors: [
+    AppBehaviors.LocalizeBehavior
+  ],
+
+  properties: {
+    app: Object,
+
+    _buttonTapHandler: {
+      type: Function,
+      value: null
+    },
+
+    _buttonText: {
+      type: String,
+      value: ''
+    },
+
+    _defaultDuration: {
+      type: Number,
+      value: 10000
+    },
+
+    _delay: {
+      type: Number
+    },
+
+    _icon: {
+      type: String,
+      value: ''
+    },
+
+    _message: {
+      type: String,
+      value: ''
+    },
+
+    _type: {
+      type: String,
+      value: ''
+    }
+  },
+
+  show: function(data) {
+    if (typeof data === 'object') {
+      this._buttonTapHandler = data.buttonTapHandler || null;
+      this._buttonText = data.buttonText;
+      this._delay = data.delay || 0;
+      this._icon = data.icon || data.type || 'info';
+      this._message = data.message;
+      this._type = data.type || 'info';
+      this.$.snackbar.duration = data.duration >= 0 ? data.duration : this._defaultDuration;
+    } else if (typeof data === 'string') {
+      this._buttonTapHandler = null;
+      this._delay = 0;
+      this._icon = 'info';
+      this._message = data;
+      this._type = 'info';
+      this.$.snackbar.duration = this._defaultDuration;
+    }
+
+    if (this._isLocalesLoaded) {
+      this._showSnackbar();
+    } else {
+      this._loadLocales(this.is);
+    }
+  },
+
+  _onButtonTap: function() {
+    if (typeof this._buttonTapHandler === 'function') {
+      this._buttonTapHandler();
+    }
+
+    this.$.snackbar.close();
+  },
+
+  _localesLoaded: function() {
+    this._showSnackbar();
+  },
+
+  _showSnackbar: function() {
+    this.async(function() {
+      if (this._buttonText) {
+        this._buttonText = this.localize(this._buttonText);
+      }
+
+      try {
+        this._message = this.localize(this._message);
+      } catch(e) {}
+
+      if (this.$.snackbar.opened) {
+        // Close snackbar for reset duration
+        this.$.snackbar.close();
+        // Wait for close snackbar
+        this.async(function() {
+          this.$.snackbar.open();
+        }, 500);
+      } else {
+        this.$.snackbar.open();
+      }
+    }, this._delay);
+  }
+
+});
+
+</script>
+</dom-module>

@@ -1,0 +1,27 @@
+{
+  "cs": {
+    "caching-complete": "Uloženo do paměti! Další zobrazení bude dostupné offline.",
+    "close": "Zavřít",
+    "download": "Stáhnout",
+    "download-chrome": "V tomto prohlížeči se vám set bohužel nezobrazí správně. Buď si prosím stáhněte Chrome, nebo set vyplňte v zařízení, které ho má. Děkujeme.",
+    "email-doesnt-match": "E-mailová adresa neodpovídá žádnému existujícímu účtu.",
+    "email-password-dont-match": "Zadaný e-mail a heslo se neshodují.",
+    "forbidden-page": "Zakázaná stránka.",
+    "changes-saved": "Změny uloženy.",
+    "more-info": "Více informací",
+    "new-version-app": "Je k dispozici nová verze aplikace.",
+    "ok": "Ok",
+    "password-reset-successfully": "Vaše heslo bylo úspěšně změněno.",
+    "refresh": "Obnovit",
+    "sorry-error-occurred": "Je nám líto, při zpracování Vašeho požadavku došlo k chybě.",
+    "successfully-activated-account": "Úspěšně jste aktivovali svůj účet.",
+    "successfully-signed-out": "Úspěšně jste se odhlásili.",
+    "successfully-updated-password": "Heslo jste úspěšně změnili, můžete se přihlásit.",
+    "you-are-offline": "Jste v režimu offline.",
+    "you-are-online": "Jste v režimu online.",
+    "you-are-signed-in": "Již jste přihlášeni.",
+    "your-browser-out-of-date": "Váš prohlížeč je zastaralý.",
+    "your-message-sent": "Vaše zpráva byla odeslána.",
+    "your-session-expires": "Vaše relace vypršela. Musíte se přihlásit znovu."
+  }
+}

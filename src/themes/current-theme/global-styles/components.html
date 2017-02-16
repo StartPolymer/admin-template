@@ -1,0 +1,48 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+
+<style is="custom-style">
+
+:root {
+
+  /* <paper-fab> */
+  --paper-fab-mini-size: var(--touch-target-size);
+  --paper-fab-mini: {
+    width: var(--paper-fab-mini-size);
+    height: var(--paper-fab-mini-size);
+    padding: calc((var(--paper-fab-mini-size) - var(--icon-size)) / 2);
+  };
+
+  /* <paper-icon-button> */
+  --paper-icon-button-size: var(--touch-target-size);
+  --paper-icon-button-padding: calc((var(--paper-icon-button-size) - var(--icon-size)) / 2);
+  --paper-icon-button-theme: {
+    padding: var(--paper-icon-button-padding);
+    width: var(--paper-icon-button-size);
+    height: var(--paper-icon-button-size);
+  };
+  --paper-icon-button: {
+    @apply(--paper-icon-button-theme);
+  };
+
+  /* <paper-tooltip> */
+  --paper-tooltip: {
+    font-size: var(--tooltip-font-size);
+  };
+
+  /* <ui-password-input> */
+  --ui-password-input-icon-size: var(--icon-size);
+  --ui-password-input-reveal-size: var(--touch-target-size);
+
+}
+
+</style>

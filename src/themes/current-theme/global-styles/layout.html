@@ -1,0 +1,93 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+
+<style is="custom-style">
+
+:root {
+
+  /* Material Design Layout
+     https://material.google.com/layout/principles.html */
+  --avatar-size: 40px;
+  --icon-size: 24px;
+  /* When the mouse and keyboard are the primary input methods, measurements may be condensed to accommodate denser layouts.
+     For dense layouts on desktop, icons can be scaled down to 20dp.
+     https://material.io/guidelines/style/icons.html#icons-system-icons */
+  --dense-icon-size: 20px;
+
+  --shell-drawer-width: 256px;
+  --max-view-width: calc(1920px - var(--shell-drawer-width) * 2);
+  --scrollbar-width: 8px;
+
+  --button-height: 36px;
+  --shell-header-height: 64px;
+
+  --border-radius: 2px;
+
+  /* Accessible Touch target
+     https://www.google.com/design/spec/usability/accessibility.html#accessibility-layout */
+  --touch-target-size: 48px;
+  --dense-touch-target-size: 40px;
+
+  /* Material Design Grid
+     https://www.google.com/design/spec/layout/responsive-ui.html#responsive-ui-grid */
+
+  /* Base spacing unit */
+  --spacing-unit: 8px;
+
+  /* Gutter and Margin */
+  --big-gutter: 24px;
+  --gutter: 16px;
+  --small-gutter: 8px;
+  --grid-gutter: 0px;
+  --screen-edge-margin: 16px;
+
+  /* Logo */
+  --header-logo-width: 112px;
+  --header-logo-height: 16px;
+
+}
+
+/* Tablet wide */
+@media screen and (min-width: 600px) {
+  :root {
+    --grid-gutter: 16px;
+  }
+}
+
+/* Laptop wide */
+@media screen and (min-width: 960px) {
+  :root {
+    --big-gutter: 32px;
+    --gutter: 24px;
+    --grid-gutter: 24px;
+    --screen-edge-margin: 24px;
+  }
+}
+
+/* Large wide */
+@media screen and (min-width: 1600px) {
+  :root {
+    --big-gutter: 40px;
+    --screen-edge-margin: 40px;
+    --shell-drawer-width: 296px;
+    --max-view-width: calc(1920px - var(--shell-drawer-width) * 2);
+  }
+}
+
+/* XLarge wide */
+@media screen and (min-width: 1920px) and (min-height: 1080px) {
+  :root {
+    /*--small-gutter: 16px; TODO: Issue: Polymer ignore min-height */
+  }
+}
+
+</style>

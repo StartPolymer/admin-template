@@ -1,0 +1,31 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/progressive-app.html",
+  "fragments": [
+    "src/pages/page-404.html",
+    "src/pages/page-about.html",
+    "src/pages/page-home.html",
+    "src/io/io-service-worker.html",
+    "src/lazy-resources.html",
+    "src/shell/shell-drawer.html",
+    "src/shell/shell-home-page-lazy-resources.html",
+    "src/shell/shell-layout.html",
+    "src/shell/shell-lazy-resources.html",
+    "src/ui/ui-snackbar.html"
+  ],
+  "sourceGlobs": [
+    "data/**/*",
+    "fonts/**/*",
+    "images/**/*",
+    "src/**/*",
+    "bower.json",
+    "clear-cache.html",
+    "app-version.json"
+  ],
+  "includeDependencies": [
+    "bower_components/webcomponentsjs/webcomponents-lite.min.js",
+    "manifest.json",
+    "src/config.js",
+    "src/spinner.css"
+  ]
+}

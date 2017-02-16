@@ -1,0 +1,423 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <base href="/">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="generator" content="StartPolymer Admin Template">
+
+  <title>Admin</title>
+  <meta name="description" content="StartPolymer Admin Template">
+
+  <link rel="icon" type="image/png" href="images/icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="images/icons/favicon-16x16.png" sizes="16x16">
+  <link rel="icon" type="image/x-icon" href="images/icons/favicon.ico">
+
+  <!-- See https://goo.gl/OOhYW5 -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- See https://goo.gl/qRE0vM -->
+  <meta name="theme-color" content="#00ACC1"> <!-- Cyan 600 -->
+
+  <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Admin">
+
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Admin">
+
+  <!-- Homescreen icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="images/icons/apple-touch-icon.png">
+  <link rel="mask-icon" href="images/icons/safari-pinned-tab.svg" color="#5bbad5">
+
+  <!-- Tile icon for Windows 8 (144x144 + tile color) -->
+  <meta name="msapplication-TileImage" content="images/icons/mstile-150x150.png">
+  <meta name="msapplication-TileColor" content="#00ACC1">
+  <meta name="msapplication-tap-highlight" content="no">
+
+  <script src="src/config.js"></script>
+
+  <!-- Unsupported browser checks need to come before webcomponents.js is loaded,
+       otherwise unsupported browsers will error out and not record a pageview.
+       Analytics lib is also loaded up front for error reporting. -->
+  <script src="https://www.google-analytics.com/analytics.js" async></script>
+
+  <script>
+  (function() {
+    "use strict";
+
+    // Setup Polymer options
+    // Use Polymer's lazy registration feature to speed up initial boot.
+    window.Polymer = window.Polymer || {lazyRegister: true, dom: 'shadow'};
+
+    // Initializes the analytics.js command queue.
+    window.ga = window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+
+    if (window.Config.googleAnalytics.isEnabled) {
+      // Creates the tracker.
+      ga('create', window.Config.googleAnalytics.defaultTracker);
+    }
+
+    // Setup error tracking before anything else runs.
+    window.onerror = function(message, file, lineNumber, columnNumber, error) {
+      // We don't want to trigger any errors inside window.onerror, so wrap in a try/catch.
+      try {
+        // Some browsers don't support error param yet.
+        if (error !== undefined) {
+          message = error.stack;
+        }
+        ga('send', 'event', 'error', file + ':' + lineNumber, message);
+      } catch (e) {
+        // no-op
+      }
+    };
+
+    /**
+     * @param {string} param URL parameter to look for.
+     * @return {string|undefined} undefined if the URL parameter does not exist.
+     */
+    function getUrlParameter(param) {
+      if (!window.location.search) {
+        return;
+      }
+      var m = new RegExp(param + '=([^&]*)').exec(window.location.search.substring(1));
+      if (!m) {
+        return;
+      }
+      return decodeURIComponent(m[1]);
+    }
+
+    // If ?ignore_browser_check=true is in the URL, the user is coming back from
+    // "upgrade your browser" and we let them proceed.
+    var ignoreCheck = getUrlParameter('ignore_browser_check') == 'true';
+    // Check if browser is supported by web components polyfill.
+    // Feature detection isn't sufficient; webcomponentsjs attempts to polyfill
+    // missing features, but some browsers are known to not work under it.
+    // https://www.polymer-project.org/resources/compatibility.html
+    var supported = ignoreCheck || (function whatBrowserYouBe() {
+      var uaString = navigator.userAgent;
+      // Sorry IE < 11.
+      var msie = /MSIE +([\d\.]+)/.exec(uaString);
+      if (msie && msie[1]) {
+        if (msie[1] === '7.0') {
+          var tridentVersion = /Trident\/(\d.\d)/.exec(uaString);
+          if (tridentVersion && tridentVersion[1]) {
+            return parseInt(tridentVersion[1], 10) >= 6;
+          } else {
+            return false;
+          }
+        } else {
+          return parseInt(msie[1], 10) >= 11;
+        }
+      }
+      // Sorry older Android browser.
+      if (uaString.indexOf('Chrome') === -1 && uaString.indexOf('Android') !== -1) {
+        return !/^Google/.test(navigator.vendor);
+      }
+      // Sorry Opera < 15.
+      if (uaString.indexOf('Opera') !== -1) {
+        return false;
+      }
+      // Everyone else goes through.
+      return true;
+    })();
+
+    if (!supported) {
+      var redirectToUpgradePage = function() {
+        window.location = 'https://browser-update.org/update.html';
+      };
+      // Sends a pageview here because this code will run before IOWA.Analytics is initialized.
+      ga('send', 'pageview');
+      ga('send', 'event', 'browser', 'unsupported-polymer', navigator.userAgent, {
+        hitCallback: setTimeout(redirectToUpgradePage, 3000)
+      });
+      // Adds a timeout to redirect in the event that analytics.js fails to
+      // load or is blocked by a browser extension.
+      setTimeout(redirectToUpgradePage, 3000);
+    }
+
+    // Get Chrome, Chromium, Opera, Vivaldi version
+    function getChromeVersion () {
+      var raw = navigator.userAgent.match(/Chrome\/([0-9]+)\./);
+      return raw ? parseInt(raw[1], 10) : false;
+    };
+    // Get Firefox version
+    function getFirefoxVersion () {
+      var raw = navigator.userAgent.match(/Firefox\/([0-9]+)\./);
+      return raw ? parseInt(raw[1], 10) : false;
+    };
+
+    var chromeVer = getChromeVersion();
+    var firefoxVer = getFirefoxVersion();
+
+    // Load ES6, Internationalization polyfills if browser does not support it
+    // TODO: Add Fetch polyfill - resolve app routing issue in IE11
+    if (!(chromeVer && chromeVer >= 46 || firefoxVer && firefoxVer >= 40)) {
+      var script = document.createElement('script');
+      //script.async = true;
+      script.src = 'https://cdn.polyfill.io/v2/polyfill.min.js?features=es6,intl';
+      document.head.appendChild(script);
+      ga('send', 'event', 'browser', 'unsupported-es6-intl', navigator.userAgent);
+      window.Config.isDebugMode &&
+        console.log('Your browser is out-of-date. Please download one of these up-to-date, free and excellent browsers: Chrome, Chromium, Opera, Vivaldi');
+    }
+
+    // Adds User Timing marks for relevant perf events.
+    // These events correspond to the values tracked in analytics.js;
+    // changes made here must be made there as well.
+    var perfEvents = ['HTMLImportsLoaded', 'WebComponentsReady'];
+    if (window.performance && window.performance.mark) {
+      perfEvents.forEach(function(eventName) {
+        document.addEventListener(eventName, function() {
+          performance.mark(eventName);
+        });
+      });
+    }
+
+  })();
+  </script>
+
+  <link rel="import" href="src/progressive-app.html">
+
+  <!-- Critical pages styles can go here -->
+  <style>
+
+    /* Google Fonts from url https://fonts.googleapis.com/css?family=Roboto:400,500&subset=latin-ext */
+    @font-face {
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 400;
+      /* Use local copy of font, if the user does not have that font installed (two different names are tried),
+         then the downloadable font is used instead. */
+      src: local('Roboto'), local('Roboto-Regular'),
+           url(fonts/roboto/v15/latin-ext/roboto-400-fIKu7GwZTy_12XzG_jt8eA.woff2) format('woff2'),
+           url(fonts/roboto/v15/latin-ext/roboto-400-Xyjz-jNkfiYuJf8UC3Lizw.woff) format('woff');
+    }
+
+    @font-face {
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 500;
+      src: local('Roboto Medium'), local('Roboto-Medium'),
+           url(fonts/roboto/v15/latin-ext/roboto-500-oOeFwZNlrTefzLYmlVV1UFtXRa8TVwTICgirnJhmVJw.woff2) format('woff2'),
+           url(fonts/roboto/v15/latin-ext/roboto-500-oOeFwZNlrTefzLYmlVV1UD8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
+    }
+
+    /* Set font Segoe UI 500 as font Segoe UI Semibold 600 */
+    @font-face {
+      font-family: 'Segoe UI';
+      font-style: normal;
+      font-weight: 400;
+      src: local('Segoe UI'), local('Segoe-UI');
+    }
+
+    @font-face {
+      font-family: 'Segoe UI';
+      font-style: normal;
+      font-weight: 500;
+      src: local('Segoe UI Semibold'), local('Segoe-UI-Semibold');
+    }
+
+    body {
+      /* font-family is inspired by Bootstrap v4's native system fonts to load quickly and look good on all platforms.
+         http://v4-alpha.getbootstrap.com/content/reboot/#native-font-stack */
+      font-family:
+        /* Safari for OS X and iOS (San Francisco) */
+        -apple-system,
+        /* Chrome >= 56 for OS X (San Francisco), Windows, Linux and Android */
+        system-ui,
+        /* Chrome < 56 for OS X (San Francisco) */
+        BlinkMacSystemFont,
+        /* Windows */
+        'Segoe UI',
+        /* Android, Chrome OS and other OS with downloadable font from /fonts/roboto */
+        'Roboto',
+        /* Noto is the standard typeface on Android for all languages not covered by Roboto. */
+        'Noto',
+        /* Basic web fallback */
+        'Helvetica Neue', 'Helvetica', Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 24px;
+      min-height: 100vh;
+      background-color: #f5f5f5; /* Grey 100 */
+
+      /* Remove default margin is currently needed for iOS viewer embeds. */
+      margin: 0;
+
+      /* Remove highlight when tapping on elements. */
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+      /* Font smoothing for OS X */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+
+      /* Text adjust is set to 100% to avoid iOS Safari bugs where the font-size is
+         sometimes not restored during orientation. */
+      -webkit-text-size-adjust: 100%;
+
+      /* Hide scrollbars in IE 10+. */
+      -ms-overflow-style: none;
+    }
+
+    /* Hide scrollbars in Webkit-based browsers (Chrome and Safari). */
+    body::-webkit-scrollbar {
+      width: 0 !important;
+    }
+
+    /* Styling for render while resources are loading. For browsers don't support native Web Components. */
+    progressive-app[unresolved] {
+      display: block;
+      min-height: 100vh;
+    }
+
+    progressive-app[unresolved] .Header {
+      background-color: #00ACC1; /* Cyan 600 */
+      color: #fff;
+      font-size: 20px;
+      line-height: 64px;
+      padding: 0 0 0 88px;
+    }
+
+    progressive-app[unresolved] .Header-logo {
+      background-image: url('images/logos/logo.svg');
+      width: 112px;
+      height: 16px;
+      position: absolute;
+      top: 23px;
+      left: 56px;
+    }
+
+    progressive-app[unresolved] .Main {
+      position: absolute;
+      top: 64px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+
+      -ms-flex-direction: column;
+      -webkit-flex-direction: column;
+      flex-direction: column;
+
+      -ms-flex-align: center;
+      -webkit-align-items: center;
+      align-items: center;
+
+      -ms-flex-pack: center;
+      -webkit-justify-content: center;
+      justify-content: center;
+    }
+
+    /* Laptop wide */
+    @media screen and (min-width: 960px) {
+      progressive-app[unresolved] .Header {
+        background-color: transparent;
+      }
+
+      progressive-app[unresolved] .Header-logo {
+        left: 72px;
+      }
+    }
+
+    /* Large wide */
+    @media screen and (min-width: 1600px) {
+      progressive-app[unresolved] .Header-logo {
+        left: 88px;
+      }
+    }
+
+  </style>
+
+  <link href="src/spinner.css" rel="stylesheet">
+
+  <!-- Smartlook
+  <script type="text/javascript" async>
+    window.smartlook||(function(d) {
+    var o=smartlook=function(){ o.api.push(arguments)},h=d.getElementsByTagName('head')[0];
+    var c=d.createElement('script');o.api=new Array();c.async=true;c.type='text/javascript';
+    c.charset='utf-8';c.src='//rec.getsmartlook.com/recorder.js';h.appendChild(c);
+    })(document);
+    smartlook('init', '91eb166ba612e97d6a26c6a500a70dee13d20826');
+  </script>
+  -->
+
+</head>
+<body>
+
+  <progressive-app unresolved>
+    <!-- Content for render while resources are loading. For browsers don't support native Web Components. -->
+    <div class="Header">
+      <div class="Header-logo"></div>
+    </div>
+    <div class="Main">
+      <div class="Spinner">
+        <div class="Spinner-layer">
+          <div class="Spinner-circleClipper Spinner-circleClipper--left"></div>
+          <div class="Spinner-circleClipper Spinner-circleClipper--right"></div>
+        </div>
+      </div>
+    </div>
+  </progressive-app>
+
+  <script>
+  (function() {
+    'use strict';
+
+    // Store a time stamp for timing analysis toolkit.
+    window.performance && performance.mark && performance.mark('index.html');
+
+    var onload = function() {
+      // For native Imports, manually fire WebComponentsReady so user code
+      // can use the same code path for native and polyfill'd imports.
+      if (!window.HTMLImports) {
+        document.dispatchEvent(
+          new CustomEvent('WebComponentsReady', {bubbles: true})
+        );
+      }
+    };
+    var webComponentsSupported = (
+      'registerElement' in document
+      && 'import' in document.createElement('link')
+      && 'content' in document.createElement('template')
+    );
+    // Load webcomponentsjs polyfill if browser doesn't support native Web Components.
+    if (!webComponentsSupported) {
+      var script = document.createElement('script');
+      script.async = true;
+      script.src = 'bower_components/webcomponentsjs/webcomponents-lite.min.js';
+      script.onload = onload;
+      document.head.appendChild(script);
+      ga('send', 'event', 'browser', 'unsupported-web-components', navigator.userAgent);
+      window.Config.isDebugMode &&
+        console.log('Web Components aren\'t supported! Please download one of these up-to-date, free and excellent browsers: Chrome, Chromium, Opera, Vivaldi');
+    } else {
+      onload();
+    }
+
+    window.Config.isDebugMode &&
+      console.log('%cWelcome to StartPolymer Admin Template!\n' +
+                  '%cStarting point for building Progressive Web Apps based on Polymer & Material Design with motto #UseThePlatform.',
+                  'font-size: 1.5em; color: #3F51B5;', 'color: #F50057; font-size: 1em;');
+
+  })();
+
+  </script>
+
+</body>
+</html>

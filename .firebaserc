@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "startpolymer-admin-template",
+    "dev": "startpolymer-admin-template",
+    "stage": "startpolymer-admin-template",
+    "prod": "startpolymer-admin-template"
+  }
+}

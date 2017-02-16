@@ -1,0 +1,143 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../../bower_components/paper-styles/color.html">
+
+<style is="custom-style">
+
+  /* Polymer includes a shim for CSS Custom Properties that we can use for application theming.
+     Below, you'll find the default palette for the Polymer Starter Kit Plus layout. Feel free to play
+     with changing the colors used or generate your own palette of colours at MaterialPalette.com.
+
+     See https://www.polymer-project.org/1.0/docs/devguide/styling.html#xscope-styling-details
+     for further information on custom CSS properties.
+
+     CSS Variables: Why Should You Care?
+     https://developers.google.com/web/updates/2016/02/css-variables-why-should-you-care */
+
+  :root {
+
+    /* Material Design Color
+       http://www.google.com/design/spec/style/color.html */
+
+    /* Material Design Themes
+       https://www.google.com/design/spec/style/color.html#color-themes */
+
+    /* Light theme */
+    --light-theme-primary-background-color: var(--paper-grey-50);     /* Content background */
+    --light-theme-secondary-background-color: var(--paper-grey-200);  /* Main / Drawer background */
+    --light-theme-tertiary-background-color: #fff;                    /* Cards / Dialogs background */
+    --light-theme-quaternary-background-color: var(--paper-yellow-50);/* Secondary content background */
+    --light-theme-primary-text-color: rgba(0, 0, 0, 0.7);             /* MD 0.87 */
+    --light-theme-secondary-text-color: rgba(0, 0, 0, 0.54);          /* Secondary text / Icons */
+    --light-theme-disabled-text-color: rgba(0, 0, 0, 0.26);           /* Disabled / Hint text */
+    --light-theme-divider-color: rgba(0, 0, 0, 0.12);
+
+    /* Dark theme */
+    --dark-theme-primary-background-color: #303030;                   /* Content background */
+    --dark-theme-secondary-background-color: var(--paper-grey-900);   /* Main / Drawer background */
+    --dark-theme-tertiary-background-color: var(--paper-grey-800);    /* Cards / Dialogs background */
+    --dark-theme-quaternary-background-color: #303030;                /* Secondary content background */
+    --dark-theme-primary-text-color: rgba(255, 255, 255, 0.9);
+    --dark-theme-secondary-text-color: rgba(255, 255, 255, 0.7);      /* Secondary text / Icons */
+    --dark-theme-disabled-text-color: rgba(255, 255, 255, 0.3);       /* Disabled / Hint text */
+    --dark-theme-divider-color: rgba(255, 255, 255, 0.12);
+
+    /* Colors */
+    --primary-background-color: var(--light-theme-primary-background-color);
+    --secondary-background-color: var(--light-theme-secondary-background-color);
+    --tertiary-background-color: var(--light-theme-tertiary-background-color);
+    --quaternary-background-color: var(--light-theme-quaternary-background-color);
+
+    --primary-text-color: var(--light-theme-primary-text-color);
+    --secondary-text-color: var(--light-theme-secondary-text-color);
+    --disabled-text-color: var(--light-theme-disabled-text-color);
+
+    --accent-link-color: var(--dark-accent-color);
+    --primary-link-color: var(--dark-primary-color);
+    --accent-link-color-shadow-color: rgba(0, 0, 0, 0.1);
+    --primary-link-color-shadow-color: rgba(0, 0, 0, 0);
+
+    --divider-color: var(--light-theme-divider-color);
+    --error-color: var(--paper-deep-orange-a700);                     /* User input errors */
+
+    /* Primary color */
+    --primary-color-50: var(--paper-cyan-50);
+    --primary-color-100: var(--paper-cyan-100);
+    --primary-color-200: var(--paper-cyan-200);
+    --primary-color-300: var(--paper-cyan-300);
+    --primary-color-400: var(--paper-cyan-400);
+    --primary-color-500: var(--paper-cyan-500);
+    --primary-color-600: var(--paper-cyan-600);
+    --primary-color-700: var(--paper-cyan-700);
+    --primary-color-800: var(--paper-cyan-800);
+    --primary-color-900: var(--paper-cyan-900);
+    --primary-color: var(--primary-color-500);                        /* Header bar */
+    --light-primary-color: var(--primary-color-100);
+    --dark-primary-color: var(--primary-color-600);
+    --text-primary-color: #fff;                                       /* Text / Icons */
+    --secondary-text-primary-color: var(--paper-grey-300);
+    --text-light-primary-color: var(--light-theme-primary-text-color);
+    --text-dark-primary-color: #fff;
+    --text-primary-color-shadow-color: rgba(0, 0, 0, 0.2);
+    --text-light-primary-color-shadow-color: rgba(0, 0, 0, 0);
+    --text-dark-primary-color-shadow-color: rgba(0, 0, 0, 0.2);
+
+    /* Accent color */
+    --accent-color-100: var(--paper-pink-a100);
+    --accent-color-200: var(--paper-pink-a200);
+    --accent-color-400: var(--paper-pink-a400);
+    --accent-color-700: var(--paper-pink-a700);
+    --accent-color: var(--accent-color-200);                          /* Focus / Links / Switches */
+    --light-accent-color: var(--accent-color-100);
+    --dark-accent-color: var(--accent-color-400);
+    --text-accent-color: #fff;                                        /* Text / Icons */
+    --text-light-accent-color: var(--light-theme-primary-text-color);
+    --text-dark-accent-color: #fff;
+    --text-accent-color-shadow-color: rgba(0, 0, 0, 0.2);
+    --text-light-accent-color-shadow-color: rgba(0, 0, 0, 0);
+    --text-dark-accent-color-shadow-color: rgba(0, 0, 0, 0.2);
+
+    /* Conversion color */
+    --conversion-color: var(--paper-green-a700);                       /* Conversion buttons (call to action, CTA) */
+    --text-conversion-color: #fff;
+    --text-conversion-color-shadow-color: rgba(0, 0, 0, 0.2);
+
+    /* Toggle button colors
+       https://www.google.com/design/spec/components/selection-controls.html#selection-controls-switch */
+    --light-theme-toggle-unchecked-bar-color: #000;
+    --light-theme-toggle-unchecked-button-color: var(--paper-grey-50);
+    --light-theme-toggle-unchecked-ink-color: var(--paper-grey-700);
+    --light-theme-toggle-checked-bar-color: var(--accent-color);
+    --light-theme-toggle-checked-button-color: var(--accent-color);
+    --light-theme-toggle-checked-ink-color: var(--dark-accent-color);
+
+    --dark-theme-toggle-unchecked-bar-color: var(--paper-grey-400);
+    --dark-theme-toggle-unchecked-button-color: var(--paper-grey-400);
+    --dark-theme-toggle-unchecked-ink-color: var(--paper-grey-50);
+    --dark-theme-toggle-checked-bar-color: var(--light-accent-color);
+    --dark-theme-toggle-checked-button-color: var(--light-accent-color);
+    --dark-theme-toggle-checked-ink-color: var(--light-accent-color);
+
+    --toggle-unchecked-bar-color: var(--light-theme-toggle-unchecked-bar-color);
+    --toggle-unchecked-button-color: var(--light-theme-toggle-unchecked-button-color);
+    --toggle-unchecked-ink-color: var(--light-theme-toggle-unchecked-ink-color);
+    --toggle-checked-bar-color: var(--light-theme-toggle-checked-bar-color);
+    --toggle-checked-button-color: var(--light-theme-toggle-checked-button-color);
+    --toggle-checked-ink-color: var(--light-theme-toggle-checked-ink-color);
+
+    /* Deprecated values because of their confusing names.
+       https://github.com/PolymerElements/paper-styles/blob/master/default-theme.html */
+    --default-primary-color: var(--primary-color);
+
+  }
+
+</style>
